@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "recallrai"
+version = "0.0.1"
+description = "Comming soon"
+authors = ["Devasheesh Mishra <devasheeshmishra4@gmail.com>"]
+license = "MIT License"
+readme = "README.md"
+package-mode = true
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+twine = "^5.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
