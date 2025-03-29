@@ -9,8 +9,13 @@ This module provides the RecallrAI class, which is the primary interface for the
 
 import uuid
 from typing import Any, Dict, Optional
-from .utils import HTTPClient
-from .models import User, UserList
+from pydantic import HttpUrl
+from .utils import HTTPClient, RecallrAIError
+from .models import User, UserList, SessionStatus, SessionList
+from .session import Session
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 class RecallrAI:
     """
@@ -23,7 +28,7 @@ class RecallrAI:
         self,
         api_key: str,
         project_id: uuid.UUID,
-        base_url: str = "https://api.recallrai.com",
+        base_url: HttpUrl = "https://api.recallrai.com",
         timeout: int = 30,
     ):
         """
@@ -38,15 +43,16 @@ class RecallrAI:
         if not api_key.startswith("rai_"):
             raise ValueError("API key must start with 'rai_'")
         
+        self.api_key = api_key
+        self.project_id = str(project_id)
+        self.base_url = str(base_url)
+        
         self.http = HTTPClient(
-            api_key=api_key,
-            project_id=str(project_id),
-            base_url=base_url,
+            api_key=self.api_key,
+            project_id=self.project_id,
+            base_url=self.base_url,
             timeout=timeout,
         )
-        self.api_key = api_key
-        self.project_id = project_id
-        self.base_url = base_url
 
     # User management
     def create_user(self, user_id: str, metadata: Optional[Dict[str, Any]] = None) -> User:
@@ -139,3 +145,72 @@ class RecallrAI:
             NotFoundError: If the user is not found
         """
         self.http.delete(f"/api/v1/users/{user_id}")
+
+    # Session management
+    def create_session(self, user_id: str, auto_process_after_minutes: int = -1) -> Session:
+        """
+        Create a new session for a user.
+
+        Args:
+            user_id: ID of the user to create the session for
+            auto_process_after_minutes: Minutes to wait before auto-processing (-1 to disable)
+
+        Returns:
+            A Session object to interact with the created session
+
+        Raises:
+            NotFoundError: If the user is not found
+            ValidationError: If auto_process_after_minutes is invalid
+        """
+        response = self.http.post(
+            f"/api/v1/users/{user_id}/sessions",
+            data={"auto_process_after_minutes": auto_process_after_minutes},
+        )
+        
+        session_id = response["session_id"]
+        return Session(self.http, user_id, session_id)
+
+    def get_session(self, user_id: str, session_id: str) -> Session:
+        """
+        Get an existing session.
+
+        Args:
+            user_id: ID of the user who owns the session
+            session_id: ID of the session to retrieve
+
+        Returns:
+            A Session object to interact with the session
+
+        Raises:
+            NotFoundError: If the user or session is not found
+        """
+        # Ensure the session exists by checking its status
+        session = Session(self.http, user_id, session_id)
+        status = session.get_status()
+        if status == SessionStatus.PROCESSING:
+            raise RecallrAIError("Session is already processing. You can't add messages to it. Create a new session instead.")
+        elif status == SessionStatus.PROCESSED:
+            raise RecallrAIError("Session has already been processed. You can't add messages to it. Create a new session instead.")
+        
+        return session
+
+    def list_sessions(self, user_id: str, offset: int = 0, limit: int = 10) -> SessionList:
+        """
+        List sessions for a user with pagination.
+
+        Args:
+            user_id: ID of the user
+            offset: Number of records to skip
+            limit: Maximum number of records to return
+
+        Returns:
+            List of sessions with pagination info
+
+        Raises:
+            NotFoundError: If the user is not found
+        """
+        response = self.http.get(
+            f"/api/v1/users/{user_id}/sessions",
+            params={"offset": offset, "limit": limit},
+        )
+        return SessionList.from_api_response(response)

@@ -7,8 +7,14 @@
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
         "**/.vscode": true,
-        "**/dist": true,
+        "**/__pycache__": true,
+        "poetry.lock": true,
+        "**/~*": true,
+        "**/.pytest_cache": true,
         "**/.venv": true,
-        "**/poetry.lock": true,
     },
+    "material-icon-theme.folders.associations": {
+        "sample_data": "Database"
+    },
+    "makefile.configureOnOpen": false
 }
