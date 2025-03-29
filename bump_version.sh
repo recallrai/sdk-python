@@ -8,7 +8,6 @@
 # 2. Commits changes
 # 3. Creates a git tag
 # 4. Pushes changes and tag to GitHub
-# 5. CI/CD will automatically handle the release process
 #
 # Usage: ./scripts/release.sh <major|minor|patch> [tag message]
 
@@ -95,4 +94,5 @@ echo "✓ Pushed changes and tag to remote"
 
 echo ""
 echo "✅ Successfully released version $NEW_VERSION"
-echo "CI/CD pipeline should now be triggered by the tag push"
+echo "Go to Github and create a new release for tag $TAG_NAME"
+echo "Then, CICD will take care of the rest!"
