@@ -230,18 +230,18 @@ from recallrai import RecallrAI
 from recallrai.exceptions import UserNotFoundError
 
 # Initialize RecallrAI and OpenAI clients
-recallrai_client = RecallrAI(
+rai_client = RecallrAI(
     api_key="rai_yourapikey", 
     project_id="your-project-uuid"
 )
-openai_client = openai.OpenAI(api_key="your-openai-api-key")
+oai_client = openai.OpenAI(api_key="your-openai-api-key")
 
 def chat_with_memory(user_id, session_id=None):
     # Get or create user
     try:
-        user = recallrai_client.get_user(user_id)
+        user = rai_client.get_user(user_id)
     except UserNotFoundError:
-        user = recallrai_client.create_user(user_id)
+        user = rai_client.create_user(user_id)
     
     # Create a new session or get an existing one
     if session_id:
@@ -278,7 +278,7 @@ def chat_with_memory(user_id, session_id=None):
         previous_messages = [{"role": message.role, "content": message.content} for message in previous_messages]
 
         # Call the LLM with the system prompt and conversation history
-        response = openai_client.chat.completions.create(
+        response = oai_client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
