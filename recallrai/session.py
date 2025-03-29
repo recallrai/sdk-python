@@ -1,6 +1,3 @@
-# Path: recallrai/session.py
-# Description: Session management class for the RecallrAI SDK
-
 """
 Session management functionality for the RecallrAI SDK.
 """

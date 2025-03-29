@@ -1,13 +1,9 @@
-# Path: recallrai/models/user.py
-# Description: User data models for the RecallrAI SDK
-
 """
 User-related data models for the RecallrAI SDK.
 """
 
 from datetime import datetime
 from typing import Any, Dict
-
 from pydantic import BaseModel, Field
 
 

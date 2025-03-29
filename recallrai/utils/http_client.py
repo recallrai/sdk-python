@@ -1,6 +1,6 @@
-# Path: recallrai/utils/http.py
-# Description: HTTP client utilities for the RecallrAI SDK
-
+"""
+HTTP client for making requests to the RecallrAI API.
+"""
 from httpx import Response, Client, TimeoutException, NetworkError, ConnectError
 from typing import Any, Dict, Optional
 from ..exceptions import (

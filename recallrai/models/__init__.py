@@ -1,6 +1,6 @@
-# Path: recallrai/models/__init__.py
-# Description: Package initialization for data models
-
+"""
+Models used in the SDK.
+"""
 from .session import Context, Message, MessageRole, Session, SessionList, SessionStatus
 from .user import User, UserList
 

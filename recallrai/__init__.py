@@ -1,6 +1,3 @@
-# Path: recallrai/__init__.py
-# Description: Package initialization file with SDK version and main class exports
-
 """
 RecallrAI Python SDK
 

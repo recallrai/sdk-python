@@ -1,6 +1,3 @@
-# Path: recallrai/client.py
-# Description: Main client class for the RecallrAI SDK
-
 """
 Main client class for the RecallrAI SDK.
 
