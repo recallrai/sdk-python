@@ -6,7 +6,7 @@ Session management functionality for the RecallrAI SDK.
 """
 
 from typing import List
-from .utils import HTTPClient, RecallrAIError
+from .utils import HTTPClient
 from .models import (
     Context,
     Message,

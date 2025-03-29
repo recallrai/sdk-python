@@ -10,10 +10,10 @@ This module provides the RecallrAI class, which is the primary interface for the
 import uuid
 from typing import Any, Dict, Optional
 from pydantic import HttpUrl
-from .utils import HTTPClient, RecallrAIError
 from .models import User as UserModel, UserList, SessionStatus, SessionList
 from .user import User
 from .session import Session
+from .utils import HTTPClient
 from logging import getLogger
 
 logger = getLogger(__name__)
