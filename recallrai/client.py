@@ -11,7 +11,8 @@ import uuid
 from typing import Any, Dict, Optional
 from pydantic import HttpUrl
 from .utils import HTTPClient, RecallrAIError
-from .models import User, UserList, SessionStatus, SessionList
+from .models import User as UserModel, UserList, SessionStatus, SessionList
+from .user import User
 from .session import Session
 from logging import getLogger
 
@@ -64,14 +65,15 @@ class RecallrAI:
             metadata: Optional metadata to associate with the user
 
         Returns:
-            The created user
+            The created user object
 
         Raises:
             ValidationError: If the user_id is invalid
             BadRequestError: If a user with the same ID already exists
         """
         response = self.http.post("/api/v1/users", data={"user_id": user_id, "metadata": metadata or {}})
-        return User.from_api_response(response)
+        user_data = UserModel.from_api_response(response)
+        return User(self.http, user_data)
 
     def get_user(self, user_id: str) -> User:
         """
@@ -81,13 +83,14 @@ class RecallrAI:
             user_id: Unique identifier of the user
 
         Returns:
-            The user information
+            A User object representing the user
 
         Raises:
             NotFoundError: If the user is not found
         """
         response = self.http.get(f"/api/v1/users/{user_id}")
-        return User.from_api_response(response)
+        user_data = UserModel.from_api_response(response)
+        return User(self.http, user_data)
 
     def list_users(self, offset: int = 0, limit: int = 10) -> UserList:
         """
@@ -132,7 +135,8 @@ class RecallrAI:
             data["new_user_id"] = new_user_id
             
         response = self.http.put(f"/api/v1/users/{user_id}", data=data)
-        return User.from_api_response(response)
+        user_data = UserModel.from_api_response(response)
+        return User(self.http, user_data)
 
     def delete_user(self, user_id: str) -> None:
         """

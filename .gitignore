@@ -1,2 +1,5 @@
 .venv
 dist
+recallrai2/
+**/__pycache__/
+poetry.lock
