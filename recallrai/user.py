@@ -6,6 +6,15 @@ from typing import Any, Dict, Optional
 from .utils import HTTPClient
 from .models import User as UserModel, SessionList
 from .session import Session
+from .exceptions import (
+    UserNotFoundError,
+    UserAlreadyExistsError,
+    SessionNotFoundError,
+    RecallrAIError
+)
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 class User:
     """
@@ -46,18 +55,33 @@ class User:
             The updated user object
 
         Raises:
-            NotFoundError: If the user is not found
-            ValidationError: If the new_user_id is invalid
-            BadRequestError: If a user with the new_user_id already exists
+            UserNotFoundError: If the user is not found
+            UserAlreadyExistsError: If a user with the new_user_id already exists
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
         """
         data = {}
         if new_metadata is not None:
-            data["new_metadata"] = new_metadata
+            data["metadata"] = new_metadata
         if new_user_id is not None:
             data["new_user_id"] = new_user_id
             
         response = self._http.put(f"/api/v1/users/{self.user_id}", data=data)
-        updated_data = UserModel.from_api_response(response)
+        
+        if response.status_code == 404:
+            raise UserNotFoundError(user_id=self.user_id)
+        elif response.status_code == 409:
+            raise UserAlreadyExistsError(user_id=new_user_id)
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=f"Failed to update user: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
+            
+        updated_data = UserModel.from_api_response(response.json())
         
         # Update internal state
         self._user_data = updated_data
@@ -72,9 +96,22 @@ class User:
         Delete this user.
 
         Raises:
-            NotFoundError: If the user is not found
+            UserNotFoundError: If the user is not found
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
         """
-        self._http.delete(f"/api/v1/users/{self.user_id}")
+        response = self._http.delete(f"/api/v1/users/{self.user_id}")
+        
+        if response.status_code == 404:
+            raise UserNotFoundError(user_id=self.user_id)
+        elif response.status_code != 204:
+            raise RecallrAIError(
+                message=f"Failed to delete user: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
 
     def create_session(self, auto_process_after_minutes: int = -1) -> Session:
         """
@@ -87,14 +124,27 @@ class User:
             A Session object to interact with the created session
 
         Raises:
-            ValidationError: If auto_process_after_minutes is invalid
+            UserNotFoundError: If the user is not found
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
         """
         response = self._http.post(
             f"/api/v1/users/{self.user_id}/sessions",
             data={"auto_process_after_minutes": auto_process_after_minutes},
         )
         
-        session_id = response["session_id"]
+        if response.status_code == 404:
+            raise UserNotFoundError(user_id=self.user_id)
+        elif response.status_code != 201:
+            raise RecallrAIError(
+                message=f"Failed to create session: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
+        
+        session_id = response.json()["session_id"]
         return Session(self._http, self.user_id, session_id)
 
     def get_session(self, session_id: str) -> Session:
@@ -108,9 +158,23 @@ class User:
             A Session object to interact with the session
 
         Raises:
-            NotFoundError: If the session is not found
+            UserNotFoundError: If the user is not found
+            SessionNotFoundError: If the session is not found
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
         """
-        return Session(self._http, self.user_id, session_id)
+        # Verify the session exists by checking its status
+        session = Session(self._http, self.user_id, session_id)
+        try:
+            session.get_status()  # This will raise appropriate errors if the session doesn't exist
+            return session
+        except SessionNotFoundError:
+            raise
+        except Exception as e:
+            raise RecallrAIError(f"Error retrieving session: {str(e)}")
 
     def list_sessions(self, offset: int = 0, limit: int = 10) -> SessionList:
         """
@@ -122,9 +186,26 @@ class User:
 
         Returns:
             List of sessions with pagination info
+
+        Raises:
+            UserNotFoundError: If the user is not found
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
         """
         response = self._http.get(
             f"/api/v1/users/{self.user_id}/sessions",
             params={"offset": offset, "limit": limit},
         )
-        return SessionList.from_api_response(response)
+        
+        if response.status_code == 404:
+            raise UserNotFoundError(user_id=self.user_id)
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=f"Failed to list sessions: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
+            
+        return SessionList.from_api_response(response.json())
