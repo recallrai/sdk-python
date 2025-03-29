@@ -18,7 +18,7 @@ class ValidationError(RecallrAIError):
         self, 
         message: str = "Validation error", 
         code: str = "validation_error",
-        http_status: int = 400,
+        http_status: int = 422,
         details: Optional[Dict[str, Any]] = None
     ):
         super().__init__(message, code, http_status, details)

@@ -29,7 +29,7 @@ class RecallrAIError(Exception):
         self.http_status = http_status
         self.details = details or {}
         super().__init__(self.message)
-        
+    
     def __str__(self) -> str:
         """Return a string representation of the error."""
         if self.code:

@@ -3,7 +3,14 @@
 
 from httpx import Response, Client, TimeoutException, NetworkError, ConnectError
 from typing import Any, Dict, Optional
-from ..exceptions import TimeoutError, NetworkError as CustomNetworkError, ConnectionError
+from ..exceptions import (
+    TimeoutError, 
+    NetworkError as CustomNetworkError, 
+    ConnectionError,
+    ValidationError,
+    InternalServerError,
+    AuthenticationError,
+)
 
 class HTTPClient:
     """HTTP client for making requests to the RecallrAI API."""
@@ -75,6 +82,18 @@ class HTTPClient:
                 params=params,
                 json=data,
             )
+            if response.status_code == 422:
+                raise ValidationError(
+                    details=response.json()["detail"],
+                )
+            elif response.status_code == 500:
+                raise InternalServerError(
+                    details=response.json()["detail"],
+                )
+            elif response.status_code == 401:
+                raise AuthenticationError(
+                    details=response.json()["detail"],
+                )
             
             return response
         except TimeoutException as e:
