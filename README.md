@@ -29,42 +29,71 @@ client = RecallrAI(api_key=api_key, project_id=project_id)
 ### Create a User
 
 ```python
-from recallrai.user import User
-
-user_id = "user123"
-metadata = {"key": "value"}
-user = client.create_user(user_id=user_id, metadata=metadata)
-print("Created user:", user.user_id)
+from recallrai.exceptions import UserAlreadyExistsError
+try:
+    user = client.create_user(user_id="user123", metadata={"name": "John Doe"})
+    print(f"Created user: {user.user_id}")
+    print(f"User metadata: {user.metadata}")
+    print(f"Created at: {user.created_at}")
+except UserAlreadyExistsError as e:
+    print(f"Error: {e}")
 ```
 
 ### Get a User
 
 ```python
-user = client.get_user("user123")
-print("User metadata:", user.metadata)
+from recallrai.exceptions import UserNotFoundError
+try:
+    user = client.get_user("user123")
+    print(f"User metadata: {user.metadata}")
+    print(f"Last active: {user.last_active_at}")
+except UserNotFoundError as e:
+    print(f"Error: {e}")
 ```
 
 ### List Users
 
 ```python
 user_list = client.list_users(offset=0, limit=10)
+print(f"Total users: {user_list.total}")
+print(f"Has more users: {user_list.has_more}")
+
 for user in user_list.users:
-    print(user.user_id, user.metadata)
+    print(f"User ID: {user.user_id}")
+    print(f"Metadata: {user.metadata}")
+    print(f"Created at: {user.created_at}")
+    print(f"Last active: {user.last_active_at}")
+    print("---")
 ```
 
 ### Update a User
 
 ```python
-# Update the user's metadata and/or change the user ID
-updated_user = client.update_user(user_id="user123", new_metadata={"role": "user"}, new_user_id="user1234")
-print("Updated user id:", updated_user.user_id)
+from recallrai.exceptions import UserNotFoundError, UserAlreadyExistsError
+try:
+    user = client.get_user("user123")
+    updated_user = user.update(
+        new_metadata={"name": "John Doe", "role": "admin"},
+        new_user_id="john_doe"
+    )
+    print(f"Updated user ID: {updated_user.user_id}")
+    print(f"Updated metadata: {updated_user.metadata}")
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except UserAlreadyExistsError as e:
+    print(f"Error: {e}")
 ```
 
 ### Delete a User
 
 ```python
-client.delete_user("user1234")
-print("User deleted.")
+from recallrai.exceptions import UserNotFoundError
+try:
+    user = client.get_user("john_doe")
+    user.delete()
+    print("User deleted successfully")
+except UserNotFoundError as e:
+    print(f"Error: {e}")
 ```
 
 ## Session Management
@@ -72,66 +101,125 @@ print("User deleted.")
 ### Create a Session
 
 ```python
+from recallrai.exceptions import UserNotFoundError
 from recallrai.session import Session
 
-# Create a session for a user; auto_process_after_minutes set to -1 disables auto-processing.
-session = client.create_session(user_id="user123", auto_process_after_minutes=5)
-print("Created session id:", session.session_id)
+try:
+    # First, get the user
+    user = client.get_user("user123")
+    
+    # Create a session for the user; auto_process_after_minutes set to -1 disables auto-processing
+    session: Session = user.create_session(auto_process_after_minutes=5)
+    print("Created session id:", session.session_id)
+except UserNotFoundError as e:
+    print(f"Error: {e}")
 ```
 
 ### Get an Existing Session
 
 ```python
-# Retrieve an existing session by its ID
-session = client.get_session(user_id="user123", session_id="session-uuid")
-print("Session status:", session.get_status())
+from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
+
+try:
+    # First, get the user
+    user = client.get_user("user123")
+    
+    # Retrieve an existing session by its ID
+    session = user.get_session(session_id="session-uuid")
+    print("Session status:", session.get_status())
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except SessionNotFoundError as e:
+    print(f"Error: {e}")
 ```
 
 ### List Sessions
 
 ```python
-session_list = client.list_sessions(user_id="user123", offset=0, limit=10)
-for session in session_list.sessions:
-    print(session.session_id, session.status)
+from recallrai.exceptions import UserNotFoundError
+
+try:
+    # First, get the user
+    user = client.get_user("user123")
+    
+    # List sessions for this user
+    session_list = user.list_sessions(offset=0, limit=10)
+    for session in session_list.sessions:
+        print(session.session_id, session.status)
+except UserNotFoundError as e:
+    print(f"Error: {e}")
 ```
 
 ### Session – Adding Messages
 
-#### Add a User Message
-
 ```python
-session.add_user_message("Hello! How are you?")
+from recallrai.exceptions import UserNotFoundError, SessionNotFoundError, InvalidSessionStateError
+
+try:
+    # Add a user message
+    session.add_user_message("Hello! How are you?")
+    
+    # Add an assistant message
+    session.add_assistant_message("I'm an assistant. How can I help you?")
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except SessionNotFoundError as e:
+    print(f"Error: {e}")
+except InvalidSessionStateError as e:
+    print(f"Error: {e}")
 ```
 
 ### Session – Retrieving Context
 
 ```python
-context = session.get_context()
-print("Memory used:", context.memory_used)
-print("Context:", context.context)
-```
+from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
 
-#### Add an Assistant Message
-
-```python
-session.add_assistant_message("I'm an assistant. How can I help you?")
+try:
+    context = session.get_context()
+    print("Memory used:", context.memory_used)
+    print("Context:", context.context)
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except SessionNotFoundError as e:
+    print(f"Error: {e}")
 ```
 
 ### Session – Process Session
 
 ```python
-session.process()
+from recallrai.exceptions import UserNotFoundError, SessionNotFoundError, InvalidSessionStateError
+
+try:
+    session.process()
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except SessionNotFoundError as e:
+    print(f"Error: {e}")
+except InvalidSessionStateError as e:
+    print(f"Error: {e}")
 ```
 
 ### Session – Get Status and Messages
 
 ```python
-status = session.get_status()
-print("Session status:", status)
+from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
+from recallrai.models import SessionStatus
 
-messages = session.get_messages()
-for message in messages:
-    print(f"{message.role}: {message.content} at {message.timestamp}")
+try:
+    status = session.get_status()
+    print("Session status:", status)
+    
+    # Check if the session is in a specific state
+    if status == SessionStatus.PROCESSED:
+        print("Session has been processed")
+    
+    messages = session.get_messages()
+    for message in messages:
+        print(f"{message.role}: {message.content} at {message.timestamp}")
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except SessionNotFoundError as e:
+    print(f"Error: {e}")
 ```
 
 ## Example Usage with LLMs
@@ -139,23 +227,27 @@ for message in messages:
 ```python
 import openai
 from recallrai import RecallrAI
+from recallrai.exceptions import UserNotFoundError
 
 # Initialize RecallrAI and OpenAI clients
-recallrai_client = RecallrAI(api_key="rai_yourapikey", project_id="project-uuid")
+recallrai_client = RecallrAI(
+    api_key="rai_yourapikey", 
+    project_id="your-project-uuid"
+)
 openai_client = openai.OpenAI(api_key="your-openai-api-key")
 
 def chat_with_memory(user_id, session_id=None):
     # Get or create user
     try:
         user = recallrai_client.get_user(user_id)
-    except:
+    except UserNotFoundError:
         user = recallrai_client.create_user(user_id)
     
     # Create a new session or get an existing one
     if session_id:
-        session = recallrai_client.get_session(user_id=user_id, session_id=session_id)
+        session = user.get_session(session_id=session_id)
     else:
-        session = recallrai_client.create_session(user_id=user_id, auto_process_after_minutes=30)
+        session = user.create_session(auto_process_after_minutes=30)
         print(f"Created new session: {session.session_id}")
     
     print("Chat session started. Type 'exit' to end the conversation.")
@@ -185,7 +277,7 @@ def chat_with_memory(user_id, session_id=None):
         previous_messages = session.get_messages()
         previous_messages = [{"role": message.role, "content": message.content} for message in previous_messages]
 
-        # Call the LLM with the system prompt and user message
+        # Call the LLM with the system prompt and conversation history
         response = openai_client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -223,19 +315,99 @@ if __name__ == "__main__":
 
 ## Exception Handling
 
-> Exception handling will be improved in future.
-Each operation may raise custom exceptions defined in the SDK:
+The RecallrAI SDK implements a comprehensive exception hierarchy to help you handle different error scenarios gracefully:
+
+### Base Exception
+
+- **RecallrAIError**: The base exception for all SDK-specific errors. All other exceptions inherit from this.
+
+### Authentication Errors
+
+- **AuthenticationError**: Raised when there's an issue with your API key or project ID authentication.
+
+### Network-Related Errors
+
+- **NetworkError**: Base exception for all network-related issues.
+- **TimeoutError**: Occurs when a request takes too long to complete.
+- **ConnectionError**: Happens when the SDK cannot establish a connection to the RecallrAI API.
+
+### Server Errors
+
+- **ServerError**: Base class for server-side errors.
+- **InternalServerError**: Raised when the RecallrAI API returns a 5xx error code.
+
+### User-Related Errors
+
+- **UserError**: Base for all user-related exceptions.
+- **UserNotFoundError**: Raised when attempting to access a user that doesn't exist.
+- **UserAlreadyExistsError**: Occurs when creating a user with an ID that already exists.
+
+### Session-Related Errors
+
+- **SessionError**: Base for all session-related exceptions.
+- **SessionNotFoundError**: Raised when attempting to access a non-existent session.
+- **InvalidSessionStateError**: Occurs when performing an operation that's not valid for the current session state (e.g., adding a message to a processed session).
+
+### Input Validation Errors
+
+- **ValidationError**: Raised when provided data doesn't meet the required format or constraints.
+
+### Importing Exceptions
+
+You can import exceptions directly from the `recallrai.exceptions` module:
 
 ```python
-from recallrai.utils.exceptions import NotFoundError, ValidationError
+# Import specific exceptions
+from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
 
-try:
-    user = client.get_user("nonexistent_id")
-except NotFoundError as e:
-    print("User not found:", e.message)
-except ValidationError as e:
-    print("Invalid input:", e.message)
+# Import all exceptions
+from recallrai.exceptions import (
+    RecallrAIError,
+    AuthenticationError,
+    NetworkError,
+    TimeoutError,
+    ConnectionError,
+    ServerError, 
+    InternalServerError,
+    SessionError, 
+    SessionNotFoundError, 
+    InvalidSessionStateError,
+    UserError, 
+    UserNotFoundError, 
+    UserAlreadyExistsError,
+    ValidationError,
+)
 ```
+
+### Best Practices for Error Handling
+
+When implementing error handling with the RecallrAI SDK, consider these best practices:
+
+1. **Handle specific exceptions first**: Catch more specific exceptions before general ones.
+
+   ```python
+   try:
+       # SDK operation
+   except UserNotFoundError:
+       # Specific handling
+   except RecallrAIError:
+       # General fallback
+   ```
+
+2. **Implement retry logic for transient errors**: Network and timeout errors might be temporary.
+
+3. **Log detailed error information**: Exceptions contain useful information for debugging.
+
+4. **Handle common user flows**: For example, check if a user exists before operations, or create them if they don't:
+
+   ```python
+   try:
+       user = client.get_user(user_id)
+   except UserNotFoundError:
+       user = client.create_user(user_id)
+   ```
+
+For more detailed information on specific exceptions, refer to the API documentation.
 
 ## Conclusion
 

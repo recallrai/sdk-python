@@ -7,12 +7,9 @@ Main client class for the RecallrAI SDK.
 This module provides the RecallrAI class, which is the primary interface for the SDK.
 """
 
-import uuid
 from typing import Any, Dict, Optional
-from pydantic import HttpUrl
-from .models import User as UserModel, UserList, SessionStatus, SessionList
+from .models import User as UserModel, UserList
 from .user import User
-from .session import Session
 from .utils import HTTPClient
 from .exceptions import (
     UserAlreadyExistsError,
@@ -33,8 +30,8 @@ class RecallrAI:
     def __init__(
         self,
         api_key: str,
-        project_id: uuid.UUID,
-        base_url: HttpUrl = "https://api.recallrai.com",
+        project_id: str,
+        base_url: str = "https://api.recallrai.com",
         timeout: int = 30,
     ):
         """
@@ -50,8 +47,8 @@ class RecallrAI:
             raise ValueError("API key must start with 'rai_'")
         
         self.api_key = api_key
-        self.project_id = str(project_id)
-        self.base_url = str(base_url)
+        self.project_id = project_id
+        self.base_url = base_url
         
         self.http = HTTPClient(
             api_key=self.api_key,
