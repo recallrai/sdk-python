@@ -11,7 +11,7 @@ from .client import RecallrAI
 from .user import User
 from .session import Session
 
-__version__ = "0.1.1"
+__version__ = "0.0.1"
 __all__ = [
     "RecallrAI",
     "User",
