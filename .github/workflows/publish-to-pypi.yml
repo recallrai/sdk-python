@@ -35,7 +35,6 @@ jobs:
           twine check dist/*
 
       - name: Publish to PyPI
-        if: github.event_name == 'release'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
