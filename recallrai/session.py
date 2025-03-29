@@ -13,6 +13,12 @@ from .models import (
     SessionStatus,
     MessageRole
 )
+from .exceptions import (
+    UserNotFoundError,
+    SessionNotFoundError,
+    InvalidSessionStateError,
+    RecallrAIError
+)
 from logging import getLogger
 
 logger = getLogger(__name__)
@@ -51,21 +57,16 @@ class Session:
             message: Content of the user message
 
         Raises:
-            BadRequestError: If the session is already processed
-            NotFoundError: If the session or user is not found
+            UserNotFoundError: If the user is not found
+            SessionNotFoundError: If the session is not found
+            InvalidSessionStateError: If the session is already processed or processing
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
         """
-        # Check the status of session
-        status = self.get_status()
-        if status == SessionStatus.PROCESSED:
-            raise RecallrAIError("Cannot add message to a session that has already been processed")
-        elif status == SessionStatus.PROCESSING:
-            raise RecallrAIError("Cannot add message to a session that is currently being processed")
-        
-        # Add the user message
-        self._http.post(
-            f"/api/v1/users/{self.user_id}/sessions/{self.session_id}/add-message",
-            data={"message": message, "role": MessageRole.USER},
-        )
+        self._add_message(message, MessageRole.USER)
 
     def add_assistant_message(self, message: str) -> None:
         """
@@ -75,21 +76,56 @@ class Session:
             message: Content of the assistant message
 
         Raises:
-            BadRequestError: If the session is already processed
-            NotFoundError: If the session or user is not found
+            UserNotFoundError: If the user is not found
+            SessionNotFoundError: If the session is not found
+            InvalidSessionStateError: If the session is already processed or processing
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
         """
-        # Check the status of session
-        status = self.get_status()
-        if status == SessionStatus.PROCESSED:
-            raise RecallrAIError("Cannot add message to a session that has already been processed")
-        elif status == SessionStatus.PROCESSING:
-            raise RecallrAIError("Cannot add message to a session that is currently being processed")
+        self._add_message(message, MessageRole.ASSISTANT)
+
+    def _add_message(self, message: str, role: MessageRole) -> None:
+        """
+        Internal helper to add a message to the session.
         
-        # Add the assistant message
-        self._http.post(
+        Args:
+            message: Content of the message
+            role: Role of the message sender
+            
+        Raises:
+            UserNotFoundError: If the user is not found
+            SessionNotFoundError: If the session is not found
+            InvalidSessionStateError: If the session is already processed or processing
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
+        """
+        response = self._http.post(
             f"/api/v1/users/{self.user_id}/sessions/{self.session_id}/add-message",
-            data={"message": message, "role": MessageRole.ASSISTANT},
+            data={"message": message, "role": role.value},
         )
+        
+        if response.status_code == 404:
+            # Check if it's a user not found or session not found error
+            detail = response.json().get('detail', '')
+            if f"User {self.user_id} not found" in detail:
+                raise UserNotFoundError(user_id=self.user_id)
+            else:
+                raise SessionNotFoundError(session_id=self.session_id)
+        elif response.status_code == 400:
+            raise InvalidSessionStateError(
+                message=f"Cannot add message to session with status {self.get_status()}",
+            )
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=f"Failed to add message: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
 
     def get_context(self) -> Context:
         """
@@ -102,17 +138,36 @@ class Session:
             Context information with the memory text and whether memory was used
 
         Raises:
-            NotFoundError: If the session or user is not found
+            UserNotFoundError: If the user is not found
+            SessionNotFoundError: If the session is not found
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
         """
+        response = self._http.get(
+            f"/api/v1/users/{self.user_id}/sessions/{self.session_id}/context"
+        )
+        
+        if response.status_code == 404:
+            # Check if it's a user not found or session not found error
+            detail = response.json().get('detail', '')
+            if f"User {self.user_id} not found" in detail:
+                raise UserNotFoundError(user_id=self.user_id)
+            else:
+                raise SessionNotFoundError(session_id=self.session_id)
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=f"Failed to get context: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
         status = self.get_status()
         if status == SessionStatus.PROCESSED:
             logger.warning("Cannot add message to a session that has already been processed")
         elif status == SessionStatus.PROCESSING:
             logger.warning("Cannot add message to a session that is currently being processed")
-        response = self._http.get(
-            f"/api/v1/users/{self.user_id}/sessions/{self.session_id}/context"
-        )
-        return Context.from_api_response(response)
+        return Context.from_api_response(response.json())
 
     def process(self) -> None:
         """
@@ -122,21 +177,35 @@ class Session:
         the user's memory.
 
         Raises:
-            BadRequestError: If the session is already processed or being processed
-            NotFoundError: If the session or user is not found
-            SessionProcessingError: If there is an error during processing
+            UserNotFoundError: If the user is not found
+            SessionNotFoundError: If the session is not found
+            InvalidSessionStateError: If the session is already processed or being processed
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
         """
-        # Check the status of session
-        status = self.get_status()
-        if status == SessionStatus.PROCESSED:
-            raise RecallrAIError("Cannot process a session that has already been processed")
-        elif status == SessionStatus.PROCESSING:
-            raise RecallrAIError("Cannot process a session that is currently being processed")
-        
-        # Process the session
-        self._http.post(
+        response = self._http.post(
             f"/api/v1/users/{self.user_id}/sessions/{self.session_id}/process"
         )
+        
+        if response.status_code == 404:
+            # Check if it's a user not found or session not found error
+            detail = response.json().get('detail', '')
+            if f"User {self.user_id} not found" in detail:
+                raise UserNotFoundError(user_id=self.user_id)
+            else:
+                raise SessionNotFoundError(session_id=self.session_id)
+        elif response.status_code == 400:
+            raise InvalidSessionStateError(
+                message=f"{response.json().get('detail', f'Cannot process session with status {self.get_status()}')}",
+            )
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=f"Failed to process session: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
 
     def get_status(self) -> SessionStatus:
         """
@@ -146,12 +215,32 @@ class Session:
             SessionStatus: The current status of the session
 
         Raises:
-            NotFoundError: If the session or user is not found
+            UserNotFoundError: If the user is not found
+            SessionNotFoundError: If the session is not found
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
         """
         response = self._http.get(
             f"/api/v1/users/{self.user_id}/sessions/{self.session_id}/status"
         )
-        return SessionStatus(response["status"])
+        
+        if response.status_code == 404:
+            # Check if it's a user not found or session not found error
+            detail = response.json().get('detail', '')
+            if f"User {self.user_id} not found" in detail:
+                raise UserNotFoundError(user_id=self.user_id)
+            else:
+                raise SessionNotFoundError(session_id=self.session_id)
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=f"Failed to get session status: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
+            
+        return SessionStatus(response.json()["status"])
 
     def get_messages(self) -> List[Message]:
         """
@@ -161,9 +250,30 @@ class Session:
             List of messages in the session
 
         Raises:
-            NotFoundError: If the session or user is not found
+            UserNotFoundError: If the user is not found
+            SessionNotFoundError: If the session is not found
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
         """
         response = self._http.get(
             f"/api/v1/users/{self.user_id}/sessions/{self.session_id}/messages"
         )
-        return [Message(**msg) for msg in response["messages"]]
+        
+        if response.status_code == 404:
+            # Check if it's a user not found or session not found error
+            detail = response.json().get('detail', '')
+            if f"User {self.user_id} not found" in detail:
+                raise UserNotFoundError(user_id=self.user_id)
+            else:
+                raise SessionNotFoundError(session_id=self.session_id)
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=f"Failed to get messages: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
+            
+        data = response.json()
+        return [Message(**msg) for msg in data["messages"]]
