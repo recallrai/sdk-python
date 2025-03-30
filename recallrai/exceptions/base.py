@@ -32,6 +32,4 @@ class RecallrAIError(Exception):
     
     def __str__(self) -> str:
         """Return a string representation of the error."""
-        if self.code:
-            return f"{self.code}: {self.message}"
-        return self.message
+        return f"{self.message}. HTTP Status: {self.http_status}."
