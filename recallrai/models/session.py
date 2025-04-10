@@ -73,7 +73,6 @@ class Session(BaseModel):
             session_id=data["session_id"],
             status=data.get("status", SessionStatus.PENDING),
             created_at=data.get("created_at", datetime.now()),
-            messages=None
         )
 
 

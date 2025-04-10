@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# filepath: scripts/release.sh
+# filepath: bump_version.sh
 #
 # Version bump and tagging script for recallrai SDK
 # 
@@ -9,7 +9,7 @@
 # 3. Creates a git tag
 # 4. Pushes changes and tag to GitHub
 #
-# Usage: ./scripts/release.sh <major|minor|patch> [tag message]
+# Usage: ./bump_version.sh <major|minor|patch> [tag message]
 
 set -e  # Exit immediately if a command exits with a non-zero status
 
