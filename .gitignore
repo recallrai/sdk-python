@@ -4,3 +4,4 @@ recallrai2/
 **/__pycache__/
 poetry.lock
 **/.env
+temp.ipynb

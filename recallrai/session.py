@@ -161,9 +161,9 @@ class Session:
             )
         status = self.get_status()
         if status == SessionStatus.PROCESSED:
-            logger.warning("WARNING: Cannot add message to a session that has already been processed")
+            logger.warning("You are trying to get context for a processed session. Why do you need it?")
         elif status == SessionStatus.PROCESSING:
-            logger.warning("WARNING: Cannot add message to a session that is currently being processed")
+            logger.warning("You are trying to get context for a processing session. Why do you need it?")
         return Context.from_api_response(response.json())
 
     def process(self) -> None:
