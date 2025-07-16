@@ -4,7 +4,7 @@ User management functionality for the RecallrAI SDK.
 
 from typing import Any, Dict, Optional
 from .utils import HTTPClient
-from .models import User as UserModel, SessionList
+from .models import UserModel, SessionList
 from .session import Session
 from .exceptions import (
     UserNotFoundError,

@@ -42,7 +42,7 @@ class SessionStatus(str, enum.Enum):
     PROCESSED = "processed"
 
 
-class Session(BaseModel):
+class SessionModel(BaseModel):
     """
     Represents a conversation session.
     """
@@ -59,15 +59,15 @@ class Session(BaseModel):
         }
 
     @classmethod
-    def from_api_response(cls, data: Dict[str, Any]) -> "Session":
+    def from_api_response(cls, data: Dict[str, Any]) -> "SessionModel":
         """
-        Create a Session instance from an API response.
+        Create a SessionModel instance from an API response.
 
         Args:
             data: API response data
 
         Returns:
-            A Session instance
+            A SessionModel instance
         """
         return cls(
             session_id=data["session_id"],
@@ -80,7 +80,7 @@ class SessionList(BaseModel):
     """
     Represents a paginated list of sessions.
     """
-    sessions: List[Session] = Field(..., description="List of sessions")
+    sessions: List[SessionModel] = Field(..., description="List of sessions")
     total: int = Field(..., description="Total number of sessions")
     has_more: bool = Field(..., description="Whether there are more sessions to fetch")
 
@@ -100,7 +100,7 @@ class SessionList(BaseModel):
             A SessionList instance
         """
         return cls(
-            sessions=[Session.from_api_response(session) for session in data["sessions"]],
+            sessions=[SessionModel.from_api_response(session) for session in data["sessions"]],
             total=data["total"],
             has_more=data["has_more"],
         )

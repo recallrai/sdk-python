@@ -7,7 +7,7 @@ from typing import Any, Dict
 from pydantic import BaseModel, Field
 
 
-class User(BaseModel):
+class UserModel(BaseModel):
     """Represents a user in the RecallrAI system."""
     
     user_id: str = Field(..., description="Unique identifier for the user")
@@ -23,15 +23,15 @@ class User(BaseModel):
         }
 
     @classmethod
-    def from_api_response(cls, data: Dict[str, Any]) -> "User":
+    def from_api_response(cls, data: Dict[str, Any]) -> "UserModel":
         """
-        Create a User instance from an API response.
+        Create a UserModel instance from an API response.
 
         Args:
             data: API response data
 
         Returns:
-            A User instance
+            A UserModel instance
         """
         if "user" in data:
             user_data = data["user"]
@@ -49,7 +49,7 @@ class User(BaseModel):
 class UserList(BaseModel):
     """Represents a paginated list of users."""
     
-    users: list[User] = Field(..., description="List of users")
+    users: list[UserModel] = Field(..., description="List of users")
     total: int = Field(..., description="Total number of users")
     has_more: bool = Field(..., description="Whether there are more users to fetch")
 
@@ -65,7 +65,7 @@ class UserList(BaseModel):
             A UserList instance
         """
         return cls(
-            users=[User.from_api_response({"user": user}) for user in data["users"]],
+            users=[UserModel.from_api_response({"user": user}) for user in data["users"]],
             total=data["total"],
             has_more=data["has_more"],
         )

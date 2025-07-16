@@ -1,13 +1,13 @@
 """
 Models used in the SDK.
 """
-from .session import Context, Message, MessageRole, Session, SessionList, SessionStatus
-from .user import User, UserList
+from .session import Context, Message, MessageRole, SessionModel, SessionList, SessionStatus
+from .user import UserModel, UserList
 
 __all__ = [
-    "User", 
+    "UserModel", 
     "UserList",
-    "Session",
+    "SessionModel",
     "SessionList",
     "SessionStatus",
     "Message",

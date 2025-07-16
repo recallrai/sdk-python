@@ -29,6 +29,7 @@ httpx = "^0.28.1"
 [tool.poetry.group.dev.dependencies]
 twine = "^5.1.1"
 ipykernel = "^6.29.5"
+openai = "^1.95.1"
 
 [build-system]
 requires = ["poetry-core"]

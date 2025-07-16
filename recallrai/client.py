@@ -5,7 +5,7 @@ This module provides the RecallrAI class, which is the primary interface for the
 """
 
 from typing import Any, Dict, Optional
-from .models import User as UserModel, UserList
+from .models import UserModel, UserList
 from .user import User
 from .utils import HTTPClient
 from .exceptions import (
