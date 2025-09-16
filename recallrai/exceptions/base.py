@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 
 
 class RecallrAIError(Exception):
-    """Base exception for all RecallrAI SDK errors."""
+    """Base exception class for all RecallrAI SDK exceptions."""
 
     def __init__(
         self, 

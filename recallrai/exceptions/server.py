@@ -9,6 +9,9 @@ from .base import RecallrAIError
 class ServerError(RecallrAIError):
     """
     Base class for server-related exceptions.
+    
+    This exception serves as the base for all exceptions related to
+    server-side errors in the RecallrAI API.
     """
     def __init__(
         self, 
