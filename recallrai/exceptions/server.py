@@ -38,28 +38,27 @@ class InternalServerError(ServerError):
     ):
         super().__init__(message, code, http_status, details)
 
+class RateLimitError(ServerError):
+    """
+    Raised when the API rate limit has been exceeded.
 
-# class RateLimitError(ServerError):
-#     """
-#     Raised when the API rate limit has been exceeded.
-#
-#     This exception is raised when too many requests are made in a
-#     short period of time.
-#     """
+    This exception is raised when too many requests are made in a
+    short period of time.
+    """
 
-#     def __init__(
-#         self, 
-#         message: str = "API rate limit exceeded", 
-#         code: str = "rate_limit_exceeded",
-#         http_status: int = 429,
-#         retry_after: Optional[int] = None,
-#         details: Optional[Dict[str, Any]] = None
-#     ):
-#         details = details or {}
-#         if retry_after:
-#             details["retry_after"] = retry_after
-#         super().__init__(message, code, http_status, details)
-#         self.retry_after = retry_after
+    def __init__(
+        self,
+        message: str = "API rate limit exceeded",
+        code: str = "rate_limit_exceeded",
+        http_status: int = 429,
+        retry_after: Optional[int] = None,
+        details: Optional[Dict[str, Any]] = None,
+    ):
+        details = details or {}
+        if retry_after is not None:
+            details["retry_after"] = retry_after
+        super().__init__(message, code, http_status, details)
+        self.retry_after = retry_after
 
 
 # class ServiceUnavailableError(ServerError):

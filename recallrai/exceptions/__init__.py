@@ -5,7 +5,7 @@ Exceptions for the RecallrAI SDK.
 from .auth import AuthenticationError
 from .base import RecallrAIError
 from .network import NetworkError, TimeoutError, ConnectionError
-from .server import ServerError, InternalServerError
+from .server import ServerError, InternalServerError, RateLimitError
 from .sessions import SessionError, SessionNotFoundError, InvalidSessionStateError
 from .users import UserError, UserNotFoundError, UserAlreadyExistsError
 from .validation import ValidationError
@@ -18,6 +18,7 @@ __all__ = [
     "ConnectionError",
     "ServerError", 
     "InternalServerError",
+    "RateLimitError",
     "SessionError", 
     "SessionNotFoundError", 
     "InvalidSessionStateError",
