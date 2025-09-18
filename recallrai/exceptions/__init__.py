@@ -2,27 +2,23 @@
 Exceptions for the RecallrAI SDK.
 """
 
-from .auth import AuthenticationError
 from .base import RecallrAIError
-from .network import NetworkError, TimeoutError, ConnectionError
-from .server import ServerError, InternalServerError, RateLimitError
-from .sessions import SessionError, SessionNotFoundError, InvalidSessionStateError
-from .users import UserError, UserNotFoundError, UserAlreadyExistsError
+from .auth import AuthenticationError
+from .network import TimeoutError, ConnectionError
+from .server import InternalServerError, RateLimitError
+from .sessions import SessionNotFoundError, InvalidSessionStateError
+from .users import UserNotFoundError, UserAlreadyExistsError
 from .validation import ValidationError
 
 __all__ = [
     "RecallrAIError",
     "AuthenticationError",
-    "NetworkError", 
     "TimeoutError", 
     "ConnectionError",
-    "ServerError", 
     "InternalServerError",
     "RateLimitError",
-    "SessionError", 
     "SessionNotFoundError", 
     "InvalidSessionStateError",
-    "UserError", 
     "UserNotFoundError", 
     "UserAlreadyExistsError",
     "ValidationError",
