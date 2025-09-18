@@ -4,6 +4,7 @@ Main client class for the RecallrAI SDK.
 This module provides the RecallrAI class, which is the primary interface for the SDK.
 """
 
+import json
 from typing import Any, Dict, Optional
 from .models import UserModel, UserList
 from .user import User
@@ -112,7 +113,12 @@ class RecallrAI:
         user_data = UserModel.from_api_response(response.json())
         return User(self.http, user_data)
 
-    def list_users(self, offset: int = 0, limit: int = 10) -> UserList:
+    def list_users(
+        self, 
+        offset: int = 0, 
+        limit: int = 10, 
+        metadata_filter: Optional[Dict[str, Any]] = None
+    ) -> UserList:
         """
         List users with pagination.
 
@@ -130,7 +136,11 @@ class RecallrAI:
             TimeoutError: If the request times out
             RecallrAIError: For other API-related errors
         """
-        response = self.http.get("/api/v1/users", params={"offset": offset, "limit": limit})
+        params: Dict[str, Any] = {"offset": offset, "limit": limit}
+        if metadata_filter is not None:
+            params["metadata_filter"] = json.dumps(metadata_filter)
+
+        response = self.http.get("/api/v1/users", params=params)
         if response.status_code != 200:
             raise RecallrAIError("Failed to list users", http_status=response.status_code)
         return UserList.from_api_response(response.json())

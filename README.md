@@ -54,7 +54,7 @@ except UserNotFoundError as e:
 ### List Users
 
 ```python
-user_list = client.list_users(offset=0, limit=10)
+user_list = client.list_users(offset=0, limit=10, metadata_filter={"role": "admin"})
 print(f"Total users: {user_list.total}")
 print(f"Has more users: {user_list.has_more}")
 
@@ -108,8 +108,11 @@ try:
     # First, get the user
     user = client.get_user("user123")
     
-    # Create a session for the user; auto_process_after_minutes set to -1 disables auto-processing
-    session: Session = user.create_session(auto_process_after_minutes=5)
+    # Create a session for the user.
+    session: Session = user.create_session(
+        auto_process_after_seconds=600,
+        metadata={"type": "chat"}
+    )
     print("Created session id:", session.session_id)
 except UserNotFoundError as e:
     print(f"Error: {e}")
@@ -142,10 +145,15 @@ try:
     # First, get the user
     user = client.get_user("user123")
     
-    # List sessions for this user
-    session_list = user.list_sessions(offset=0, limit=10)
+    # List sessions for this user with optional metadata filters
+    session_list = user.list_sessions(
+        offset=0,
+        limit=10,
+        metadata_filter={"type": "chat"},           # optional
+        user_metadata_filter={"role": "admin"}       # optional (no-op for user-scoped listing)
+    )
     for session in session_list.sessions:
-        print(session.session_id, session.status)
+        print(session.session_id, session.status, session.metadata)
 except UserNotFoundError as e:
     print(f"Error: {e}")
 ```
@@ -219,6 +227,32 @@ try:
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
+    print(f"Error: {e}")
+```
+
+## User Memories
+
+### List User Memories (with optional category filters)
+
+```python
+from recallrai.exceptions import UserNotFoundError
+
+try:
+    user = client.get_user("user123")
+    memories = user.list_memories(
+        categories=["food_preferences", "alergies"],  # optional
+        offset=0,
+        limit=20,
+    )
+    for mem in memories.items:
+        print(f"Memory ID: {mem.memory_id}")
+        print(f"Categories: {mem.categories}")
+        print(f"Content: {mem.content}")
+        print(f"Created at: {mem.created_at}")
+        print("---")
+    print(f"Has more?: {memories.has_more}")
+    print(f"Total memories: {memories.total}")
+except UserNotFoundError as e:
     print(f"Error: {e}")
 ```
 

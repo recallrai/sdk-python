@@ -2,7 +2,7 @@
 Models used in the SDK.
 """
 from .session import Context, Message, MessageRole, SessionModel, SessionList, SessionStatus
-from .user import UserModel, UserList
+from .user import UserModel, UserList, UserMemoriesList
 
 __all__ = [
     "UserModel", 
@@ -13,4 +13,5 @@ __all__ = [
     "Message",
     "MessageRole",
     "Context",
+    "UserMemoriesList",
 ]

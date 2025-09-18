@@ -2,9 +2,10 @@
 User management functionality for the RecallrAI SDK.
 """
 
-from typing import Any, Dict, Optional
+import json
+from typing import Any, List, Dict, Optional
 from .utils import HTTPClient
-from .models import UserModel, SessionList
+from .models import UserModel, SessionList, UserMemoriesList
 from .session import Session
 from .exceptions import (
     UserNotFoundError,
@@ -113,12 +114,17 @@ class User:
                 http_status=response.status_code
             )
 
-    def create_session(self, auto_process_after_minutes: int = -1) -> Session:
+    def create_session(
+        self,
+        auto_process_after_seconds: int = 600,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Session:
         """
         Create a new session for this user.
 
         Args:
-            auto_process_after_minutes: Minutes to wait before auto-processing (-1 to disable)
+            auto_process_after_seconds: Seconds to wait before auto-processing (min 600)
+            metadata: Optional metadata for the session
 
         Returns:
             A Session object to interact with the created session
@@ -131,9 +137,13 @@ class User:
             TimeoutError: If the request times out
             RecallrAIError: For other API-related errors
         """
+        payload: Dict[str, Any] = {
+            "auto_process_after_seconds": auto_process_after_seconds,
+            "metadata": metadata or {},
+        }
         response = self._http.post(
             f"/api/v1/users/{self.user_id}/sessions",
-            data={"auto_process_after_minutes": auto_process_after_minutes},
+            data=payload,
         )
         
         if response.status_code == 404:
@@ -176,7 +186,13 @@ class User:
         except Exception as e:
             raise RecallrAIError(f"Error retrieving session: {str(e)}")
 
-    def list_sessions(self, offset: int = 0, limit: int = 10) -> SessionList:
+    def list_sessions(
+        self,
+        offset: int = 0,
+        limit: int = 10,
+        metadata_filter: Optional[Dict[str, Any]] = None,
+        user_metadata_filter: Optional[Dict[str, Any]] = None,
+    ) -> SessionList:
         """
         List sessions for this user with pagination.
 
@@ -195,9 +211,15 @@ class User:
             TimeoutError: If the request times out
             RecallrAIError: For other API-related errors
         """
+        params: Dict[str, Any] = {"offset": offset, "limit": limit}
+        if metadata_filter is not None:
+            params["metadata_filter"] = json.dumps(metadata_filter)
+        if user_metadata_filter is not None:
+            params["user_metadata_filter"] = json.dumps(user_metadata_filter)
+
         response = self._http.get(
             f"/api/v1/users/{self.user_id}/sessions",
-            params={"offset": offset, "limit": limit},
+            params=params,
         )
         
         if response.status_code == 404:
@@ -209,3 +231,47 @@ class User:
             )
             
         return SessionList.from_api_response(response.json())
+
+    def list_memories(
+        self,
+        offset: int = 0,
+        limit: int = 20,
+        categories: Optional[List[str]] = None,
+    ) -> UserMemoriesList:
+        """
+        List memories for this user with optional category filters.
+
+        Args:
+            offset: Number of records to skip
+            limit: Maximum number of records to return
+            categories: Optional list of category names to filter by
+
+        Returns:
+            UserMemoriesList: Paginated list of memory items
+
+        Raises:
+            UserNotFoundError: If the user is not found
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
+        """
+        params: Dict[str, Any] = {"offset": offset, "limit": limit}
+        if categories is not None:
+            params["categories"] = categories
+
+        response = self._http.get(
+            f"/api/v1/users/{self.user_id}/memories",
+            params=params,
+        )
+
+        if response.status_code == 404:
+            raise UserNotFoundError(user_id=self.user_id)
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=f"Failed to list memories: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code,
+            )
+
+        return UserMemoriesList.from_api_response(response.json())

@@ -48,6 +48,7 @@ class SessionModel(BaseModel):
     session_id: uuid.UUID = Field(..., description="Unique identifier for the session")
     status: SessionStatus = Field(..., description="Current status of the session")
     created_at: datetime = Field(..., description="When the session was created")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Optional metadata for the session")
 
     class Config:
         """Pydantic configuration."""
@@ -70,8 +71,9 @@ class SessionModel(BaseModel):
         """
         return cls(
             session_id=data["session_id"],
-            status=data.get("status", SessionStatus.PENDING),
-            created_at=data.get("created_at", datetime.now()),
+            status=data["status"],
+            created_at=data["created_at"],
+            metadata=data["metadata"],
         )
 
 

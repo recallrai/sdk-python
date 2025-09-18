@@ -3,7 +3,7 @@ User-related data models for the RecallrAI SDK.
 """
 
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List
 from pydantic import BaseModel, Field
 
 
@@ -66,6 +66,37 @@ class UserList(BaseModel):
         """
         return cls(
             users=[UserModel.from_api_response({"user": user}) for user in data["users"]],
+            total=data["total"],
+            has_more=data["has_more"],
+        )
+
+
+class UserMemoryItem(BaseModel):
+    """Represents a single memory item for a user."""
+
+    memory_id: str
+    categories: List[str]
+    content: str
+    created_at: datetime
+
+    class Config:
+        frozen = True
+        json_encoders = {
+            datetime: lambda dt: dt.isoformat()
+        }
+
+
+class UserMemoriesList(BaseModel):
+    """Represents a paginated list of user memories."""
+
+    items: List[UserMemoryItem]
+    total: int
+    has_more: bool
+
+    @classmethod
+    def from_api_response(cls, data: Dict[str, Any]) -> "UserMemoriesList":
+        return cls(
+            items=[UserMemoryItem(**item) for item in data["items"]],
             total=data["total"],
             has_more=data["has_more"],
         )
