@@ -19,9 +19,12 @@ Create a client instance with your API key and project ID:
 ```python
 from recallrai import RecallrAI
 
-api_key = "rai_yourapikey"
-project_id = "project-uuid"
-client = RecallrAI(api_key=api_key, project_id=project_id)
+client = RecallrAI(
+    api_key="rai_yourapikey",
+    project_id="project-uuid",
+    base_url="https://api.recallrai.com",  # custom endpoint if applicable
+    timeout=60,  # seconds
+)
 ```
 
 ## User Management
@@ -152,6 +155,8 @@ try:
         metadata_filter={"type": "chat"},           # optional
         user_metadata_filter={"role": "admin"}       # optional
     )
+    print(f"Total sessions: {session_list.total}")
+    print(f"Has more sessions: {session_list.has_more}")
     for session in session_list.sessions:
         print(session.session_id, session.status, session.metadata)
 except UserNotFoundError as e:
@@ -230,7 +235,7 @@ from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
 try:
     messages = session.get_messages()
     for msg in messages:
-        print(f"{msg.role.capitalize()}:(at {msg.timestamp}): {msg.content}")
+        print(f"{msg.role.value.capitalize()} (at {msg.timestamp}): {msg.content}")
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
@@ -247,7 +252,7 @@ from recallrai.exceptions import UserNotFoundError
 try:
     user = client.get_user("user123")
     memories = user.list_memories(
-        categories=["food_preferences", "alergies"],  # optional
+        categories=["food_preferences", "allergies"],  # optional
         offset=0,
         limit=20,
     )
@@ -376,6 +381,7 @@ The RecallrAI SDK implements a comprehensive exception hierarchy to help you han
 
 - **ServerError**: Base class for server-side errors.
 - **InternalServerError**: Raised when the RecallrAI API returns a 5xx error code.
+- **RateLimitError**: Raised when the API rate limit has been exceeded (HTTP 429). When available, the `retry_after` value is provided in the exception details.
 
 ### User-Related Errors
 
@@ -410,6 +416,7 @@ from recallrai.exceptions import (
     ConnectionError,
     ServerError, 
     InternalServerError,
+    RateLimitError,
     SessionError, 
     SessionNotFoundError, 
     InvalidSessionStateError,
