@@ -8,7 +8,8 @@ from .client import RecallrAI
 from .user import User
 from .session import Session
 
-__version__ = "0.2.0"
+with open("VERSION", "r") as version_file:
+    __version__ = version_file.read().strip()
 
 __all__ = [
     "RecallrAI",

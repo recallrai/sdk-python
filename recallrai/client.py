@@ -55,7 +55,11 @@ class RecallrAI:
         )
 
     # User management
-    def create_user(self, user_id: str, metadata: Optional[Dict[str, Any]] = None) -> User:
+    def create_user(
+        self, 
+        user_id: str, 
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> User:
         """
         Create a new user.
 
