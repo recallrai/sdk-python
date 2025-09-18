@@ -30,9 +30,6 @@ class HTTPClient:
             base_url: The base URL for the RecallrAI API
             timeout: Request timeout in seconds
         """
-        # Get SDK version from VERSION file
-        with open("VERSION", "r") as version_file:
-            sdk_version = version_file.read().strip()
 
         self.api_key = api_key
         self.project_id = project_id
@@ -45,7 +42,7 @@ class HTTPClient:
                 "X-Project-Id": self.project_id,
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "User-Agent": f"RecallrAI-Python-SDK/{sdk_version}",
+                "User-Agent": f"RecallrAI-Python-SDK/0.2.0",
             },
         )
 
