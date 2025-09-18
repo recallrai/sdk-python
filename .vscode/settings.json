@@ -16,5 +16,6 @@
     "material-icon-theme.folders.associations": {
         "sample_data": "Database"
     },
-    "makefile.configureOnOpen": false
+    "makefile.configureOnOpen": false,
+    "python.analysis.typeCheckingMode": "basic"
 }

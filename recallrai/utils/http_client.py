@@ -5,7 +5,6 @@ from httpx import Response, Client, TimeoutException, NetworkError, ConnectError
 from typing import Any, Dict, Optional
 from ..exceptions import (
     TimeoutError, 
-    NetworkError as CustomNetworkError, 
     ConnectionError,
     ValidationError,
     InternalServerError,
@@ -101,8 +100,6 @@ class HTTPClient:
             return response
         except TimeoutException as e:
             raise TimeoutError(f"Request timed out: {e}")
-        except NetworkError as e:
-            raise CustomNetworkError(f"Network error occurred: {e}")
         except ConnectError as e:
             raise ConnectionError(f"Failed to connect to the API: {e}")
         except Exception as e:

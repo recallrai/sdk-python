@@ -2,11 +2,12 @@
 Session-related data models for the RecallrAI SDK.
 """
 
-import enum, uuid
+import enum
 from datetime import datetime
 from typing import Any, Dict, List
 from pydantic import BaseModel, Field
-
+from ..utils import HTTPClient
+from ..session import Session
 
 class MessageRole(str, enum.Enum):
     """
@@ -32,6 +33,27 @@ class Message(BaseModel):
         }
 
 
+class SessionMessagesList(BaseModel):
+    """
+    Represents a paginated list of messages in a session.
+    """
+
+    messages: List[Message] = Field(..., description="List of messages in the page")
+    total: int = Field(..., description="Total number of messages in the session")
+    has_more: bool = Field(..., description="Whether there are more messages to fetch")
+
+    class Config:
+        frozen = True
+
+    @classmethod
+    def from_api_response(cls, data: Dict[str, Any]) -> "SessionMessagesList":
+        return cls(
+            messages=[Message(**msg) for msg in data["messages"]],
+            total=data["total"],
+            has_more=data["has_more"],
+        )
+
+
 class SessionStatus(str, enum.Enum):
     """
     Status of a session.
@@ -45,7 +67,7 @@ class SessionModel(BaseModel):
     """
     Represents a conversation session.
     """
-    session_id: uuid.UUID = Field(..., description="Unique identifier for the session")
+    session_id: str = Field(..., description="Unique identifier for the session")
     status: SessionStatus = Field(..., description="Current status of the session")
     created_at: datetime = Field(..., description="When the session was created")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Optional metadata for the session")
@@ -55,7 +77,6 @@ class SessionModel(BaseModel):
         frozen = True
         json_encoders = {
             datetime: lambda dt: dt.isoformat(),
-            uuid.UUID: lambda id: str(id)
         }
 
     @classmethod
@@ -81,7 +102,7 @@ class SessionList(BaseModel):
     """
     Represents a paginated list of sessions.
     """
-    sessions: List[SessionModel] = Field(..., description="List of sessions")
+    sessions: List[Session] = Field(..., description="List of sessions")
     total: int = Field(..., description="Total number of sessions")
     has_more: bool = Field(..., description="Whether there are more sessions to fetch")
 
@@ -90,7 +111,7 @@ class SessionList(BaseModel):
         frozen = True
 
     @classmethod
-    def from_api_response(cls, data: Dict[str, Any]) -> "SessionList":
+    def from_api_response(cls, data: Dict[str, Any], user_id: str, http_client: HTTPClient) -> "SessionList":
         """
         Create a SessionList instance from an API response.
 
@@ -101,7 +122,9 @@ class SessionList(BaseModel):
             A SessionList instance
         """
         return cls(
-            sessions=[SessionModel.from_api_response(session) for session in data["sessions"]],
+            sessions=[
+                Session(http_client, user_id, SessionModel.from_api_response(session)) for session in data["sessions"]
+            ],
             total=data["total"],
             has_more=data["has_more"],
         )

@@ -44,14 +44,10 @@ class RecallrAI:
         if not api_key.startswith("rai_"):
             raise ValueError("API key must start with 'rai_'")
         
-        self.api_key = api_key
-        self.project_id = project_id
-        self.base_url = base_url
-        
-        self.http = HTTPClient(
-            api_key=self.api_key,
-            project_id=self.project_id,
-            base_url=self.base_url,
+        self._http = HTTPClient(
+            api_key=api_key,
+            project_id=project_id,
+            base_url=base_url,
             timeout=timeout,
         )
 
@@ -79,13 +75,13 @@ class RecallrAI:
             TimeoutError: If the request times out
             RecallrAIError: For other API-related errors
         """
-        response = self.http.post("/api/v1/users", data={"user_id": user_id, "metadata": metadata or {}})
+        response = self._http.post("/api/v1/users", data={"user_id": user_id, "metadata": metadata or {}})
         if response.status_code == 409:
             raise UserAlreadyExistsError(user_id=user_id)
         elif response.status_code != 201:
             raise RecallrAIError("Failed to create user", http_status=response.status_code)
         user_data = UserModel.from_api_response(response.json())
-        return User(self.http, user_data)
+        return User(self._http, user_data)
 
     def get_user(self, user_id: str) -> User:
         """
@@ -105,13 +101,13 @@ class RecallrAI:
             TimeoutError: If the request times out
             RecallrAIError: For other API-related errors
         """
-        response = self.http.get(f"/api/v1/users/{user_id}")
+        response = self._http.get(f"/api/v1/users/{user_id}")
         if response.status_code == 404:
             raise UserNotFoundError(user_id=user_id)
         elif response.status_code != 200:
             raise RecallrAIError("Failed to retrieve user", http_status=response.status_code)
         user_data = UserModel.from_api_response(response.json())
-        return User(self.http, user_data)
+        return User(self._http, user_data)
 
     def list_users(
         self, 
@@ -140,7 +136,7 @@ class RecallrAI:
         if metadata_filter is not None:
             params["metadata_filter"] = json.dumps(metadata_filter)
 
-        response = self.http.get("/api/v1/users", params=params)
+        response = self._http.get("/api/v1/users", params=params)
         if response.status_code != 200:
             raise RecallrAIError("Failed to list users", http_status=response.status_code)
-        return UserList.from_api_response(response.json())
+        return UserList.from_api_response(response.json(), self._http)

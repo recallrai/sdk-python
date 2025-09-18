@@ -75,15 +75,30 @@ for user in user_list.users:
 from recallrai.exceptions import UserNotFoundError, UserAlreadyExistsError
 try:
     user = client.get_user("user123")
-    updated_user = user.update(
+    # update() mutates the instance; no value is returned
+    user.update(
         new_metadata={"name": "John Doe", "role": "admin"},
         new_user_id="john_doe"
     )
-    print(f"Updated user ID: {updated_user.user_id}")
-    print(f"Updated metadata: {updated_user.metadata}")
+    print(f"Updated user ID: {user.user_id}")
+    print(f"Updated metadata: {user.metadata}")
+    print(f"Last active: {user.last_active_at}")
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except UserAlreadyExistsError as e:
+    print(f"Error: {e}")
+```
+
+### Refresh User Instance
+
+```python
+from recallrai.exceptions import UserNotFoundError
+try:
+    user = client.get_user("john_doe")
+    user.refresh()
+    print(f"Refreshed user metadata: {user.metadata}")
+    print(f"Last active: {user.last_active_at}")
+except UserNotFoundError as e:
     print(f"Error: {e}")
 ```
 
@@ -132,7 +147,49 @@ try:
     
     # Retrieve an existing session by its ID
     session = user.get_session(session_id="session-uuid")
-    print("Session status:", session.get_status())
+    print("Session status:", session.status)
+    print("Session metadata:", session.metadata)
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except SessionNotFoundError as e:
+    print(f"Error: {e}")
+```
+
+### Update a Session
+
+```python
+from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
+try:
+    # First, get the user
+    user = client.get_user("user123")
+    
+    # Retrieve an existing session by its ID
+    session = user.get_session(session_id="session-uuid")
+    
+    # Update session metadata
+    session.update(new_metadata={"type": "support_chat"})
+    print("Updated session metadata:", session.metadata)
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except SessionNotFoundError as e:
+    print(f"Error: {e}")
+```
+
+### Refresh a Session
+
+```python
+from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
+try:
+    # First, get the user
+    user = client.get_user("user123")
+
+    # Retrieve an existing session by its ID
+    session = user.get_session(session_id="session-uuid")
+
+    # Refresh session data from the server
+    session.refresh()
+    print("Session status:", session.status)
+    print("Refreshed session metadata:", session.metadata)
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
@@ -213,19 +270,6 @@ except InvalidSessionStateError as e:
     print(f"Error: {e}")
 ```
 
-### Session – Getting Status
-
-```python
-from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
-
-try:
-    status = session.get_status()
-    print("Session status:", status)
-except UserNotFoundError as e:
-    print(f"Error: {e}")
-except SessionNotFoundError as e:
-    print(f"Error: {e}")
-```
 
 ### Session – List Messages
 
@@ -233,9 +277,12 @@ except SessionNotFoundError as e:
 from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
 
 try:
-    messages = session.get_messages()
-    for msg in messages:
+    # Paginated retrieval
+    messages = session.get_messages(offset=0, limit=50)
+    for msg in messages.messages:
         print(f"{msg.role.value.capitalize()} (at {msg.timestamp}): {msg.content}")
+    print(f"Has more?: {messages_page.has_more}")
+    print(f"Total messages: {messages_page.total}")
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
@@ -293,7 +340,7 @@ def chat_with_memory(user_id, session_id=None):
     if session_id:
         session = user.get_session(session_id=session_id)
     else:
-        session = user.create_session(auto_process_after_minutes=30)
+    session = user.create_session(auto_process_after_seconds=1800)
         print(f"Created new session: {session.session_id}")
     
     print("Chat session started. Type 'exit' to end the conversation.")
@@ -320,8 +367,8 @@ def chat_with_memory(user_id, session_id=None):
         Don't mention that you have access to memories unless you are explicitly asked."""
         
         # Get previous messages
-        previous_messages = session.get_messages()
-        previous_messages = [{"role": message.role, "content": message.content} for message in previous_messages]
+    messages = session.get_messages(offset=0, limit=50)
+    previous_messages = [{"role": message.role, "content": message.content} for message in messages.messages]
 
         # Call the LLM with the system prompt and conversation history
         response = oai_client.chat.completions.create(
@@ -373,25 +420,21 @@ The RecallrAI SDK implements a comprehensive exception hierarchy to help you han
 
 ### Network-Related Errors
 
-- **NetworkError**: Base exception for all network-related issues.
 - **TimeoutError**: Occurs when a request takes too long to complete.
 - **ConnectionError**: Happens when the SDK cannot establish a connection to the RecallrAI API.
 
 ### Server Errors
 
-- **ServerError**: Base class for server-side errors.
 - **InternalServerError**: Raised when the RecallrAI API returns a 5xx error code.
 - **RateLimitError**: Raised when the API rate limit has been exceeded (HTTP 429). When available, the `retry_after` value is provided in the exception details.
 
 ### User-Related Errors
 
-- **UserError**: Base for all user-related exceptions.
 - **UserNotFoundError**: Raised when attempting to access a user that doesn't exist.
 - **UserAlreadyExistsError**: Occurs when creating a user with an ID that already exists.
 
 ### Session-Related Errors
 
-- **SessionError**: Base for all session-related exceptions.
 - **SessionNotFoundError**: Raised when attempting to access a non-existent session.
 - **InvalidSessionStateError**: Occurs when performing an operation that's not valid for the current session state (e.g., adding a message to a processed session).
 
@@ -411,16 +454,12 @@ from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
 from recallrai.exceptions import (
     RecallrAIError,
     AuthenticationError,
-    NetworkError,
     TimeoutError,
     ConnectionError,
-    ServerError, 
     InternalServerError,
     RateLimitError,
-    SessionError, 
     SessionNotFoundError, 
     InvalidSessionStateError,
-    UserError, 
     UserNotFoundError, 
     UserAlreadyExistsError,
     ValidationError,

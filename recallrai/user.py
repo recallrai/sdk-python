@@ -5,7 +5,7 @@ User management functionality for the RecallrAI SDK.
 import json
 from typing import Any, List, Dict, Optional
 from .utils import HTTPClient
-from .models import UserModel, SessionList, UserMemoriesList
+from .models import UserModel, SessionModel, SessionList, UserMemoriesList
 from .session import Session
 from .exceptions import (
     UserNotFoundError,
@@ -44,16 +44,13 @@ class User:
         self.created_at = user_data.created_at
         self.last_active_at = user_data.last_active_at
 
-    def update(self, new_metadata: Optional[Dict[str, Any]] = None, new_user_id: Optional[str] = None) -> 'User':
+    def update(self, new_metadata: Optional[Dict[str, Any]] = None, new_user_id: Optional[str] = None) -> None:
         """
         Update this user's metadata or ID.
 
         Args:
             new_metadata: New metadata to associate with the user
             new_user_id: New ID for the user
-
-        Returns:
-            The updated user object
 
         Raises:
             UserNotFoundError: If the user is not found
@@ -89,8 +86,37 @@ class User:
         self.user_id = updated_data.user_id
         self.metadata = updated_data.metadata
         self.last_active_at = updated_data.last_active_at
+
+    def refresh(self) -> None:
+        """
+        Refresh this user's data from the server.
         
-        return self
+        Raises:
+            UserNotFoundError: If the user is not found
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
+        """
+        response = self._http.get(f"/api/v1/users/{self.user_id}")
+        
+        if response.status_code == 404:
+            raise UserNotFoundError(user_id=self.user_id)
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=f"Failed to refresh user: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
+        
+        refreshed_data = UserModel.from_api_response(response.json())
+        
+        # Update internal state
+        self._user_data = refreshed_data
+        self.user_id = refreshed_data.user_id
+        self.metadata = refreshed_data.metadata
+        self.created_at = refreshed_data.created_at
+        self.last_active_at = refreshed_data.last_active_at
 
     def delete(self) -> None:
         """
@@ -154,8 +180,8 @@ class User:
                 http_status=response.status_code
             )
         
-        session_id = response.json()["session_id"]
-        return Session(self._http, self.user_id, session_id)
+        session_data = SessionModel.from_api_response(response.json())
+        return Session(self._http, self.user_id, session_data)
 
     def get_session(self, session_id: str) -> Session:
         """
@@ -176,15 +202,24 @@ class User:
             TimeoutError: If the request times out
             RecallrAIError: For other API-related errors
         """
-        # Verify the session exists by checking its status
-        session = Session(self._http, self.user_id, session_id)
-        try:
-            session.get_status()  # This will raise appropriate errors if the session doesn't exist
-            return session
-        except SessionNotFoundError:
-            raise
-        except Exception as e:
-            raise RecallrAIError(f"Error retrieving session: {str(e)}")
+        # First, verify the session exists by fetching its details
+        response = self._http.get(f"/api/v1/users/{self.user_id}/sessions/{session_id}")
+        
+        if response.status_code == 404:
+            # Check if it's a user not found or session not found error
+            detail = response.json().get('detail', '')
+            if f"User {self.user_id} not found" in detail:
+                raise UserNotFoundError(user_id=self.user_id)
+            else:
+                raise SessionNotFoundError(session_id=session_id)
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=f"Failed to get session: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
+        
+        session_data = SessionModel.from_api_response(response.json())
+        return Session(self._http, self.user_id, session_data)
 
     def list_sessions(
         self,
@@ -232,7 +267,7 @@ class User:
                 http_status=response.status_code
             )
             
-        return SessionList.from_api_response(response.json())
+        return SessionList.from_api_response(response.json(), self.user_id, self._http)
 
     def list_memories(
         self,
