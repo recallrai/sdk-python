@@ -3,10 +3,11 @@ User-related data models for the RecallrAI SDK.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 from pydantic import BaseModel, Field
 from ..utils import HTTPClient
-from ..user import User
+if TYPE_CHECKING:
+    from ..user import User
 
 
 class UserModel(BaseModel):
@@ -47,8 +48,8 @@ class UserModel(BaseModel):
 
 class UserList(BaseModel):
     """Represents a paginated list of users."""
-    
-    users: List[User] = Field(..., description="List of users")
+
+    users: List["User"] = Field(..., description="List of users")
     total: int = Field(..., description="Total number of users")
     has_more: bool = Field(..., description="Whether there are more users to fetch")
 
@@ -63,6 +64,7 @@ class UserList(BaseModel):
         Returns:
             A UserList instance
         """
+        from ..user import User
         return cls(
             users=[
                 User(http_client, UserModel.from_api_response(user)) for user in data["users"]

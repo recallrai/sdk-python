@@ -4,10 +4,11 @@ Session-related data models for the RecallrAI SDK.
 
 import enum
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 from pydantic import BaseModel, Field
 from ..utils import HTTPClient
-from ..session import Session
+if TYPE_CHECKING:
+    from ..session import Session
 
 class MessageRole(str, enum.Enum):
     """
@@ -102,7 +103,7 @@ class SessionList(BaseModel):
     """
     Represents a paginated list of sessions.
     """
-    sessions: List[Session] = Field(..., description="List of sessions")
+    sessions: List["Session"] = Field(..., description="List of sessions")
     total: int = Field(..., description="Total number of sessions")
     has_more: bool = Field(..., description="Whether there are more sessions to fetch")
 
@@ -121,6 +122,7 @@ class SessionList(BaseModel):
         Returns:
             A SessionList instance
         """
+        from ..session import Session
         return cls(
             sessions=[
                 Session(http_client, user_id, SessionModel.from_api_response(session)) for session in data["sessions"]
