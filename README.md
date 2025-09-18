@@ -281,8 +281,8 @@ try:
     messages = session.get_messages(offset=0, limit=50)
     for msg in messages.messages:
         print(f"{msg.role.value.capitalize()} (at {msg.timestamp}): {msg.content}")
-    print(f"Has more?: {messages_page.has_more}")
-    print(f"Total messages: {messages_page.total}")
+    print(f"Has more?: {messages.has_more}")
+    print(f"Total messages: {messages.total}")
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
