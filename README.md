@@ -150,7 +150,7 @@ try:
         offset=0,
         limit=10,
         metadata_filter={"type": "chat"},           # optional
-        user_metadata_filter={"role": "admin"}       # optional (no-op for user-scoped listing)
+        user_metadata_filter={"role": "admin"}       # optional
     )
     for session in session_list.sessions:
         print(session.session_id, session.status, session.metadata)
@@ -158,26 +158,27 @@ except UserNotFoundError as e:
     print(f"Error: {e}")
 ```
 
-### Session – Adding Messages
+<!-- ### Session – Adding Messages
 
 ```python
 from recallrai.exceptions import UserNotFoundError, SessionNotFoundError, InvalidSessionStateError
+from recallrai.models import MessageRole
 
 try:
     # Add a user message
-    session.add_user_message("Hello! How are you?")
+    session.add_message(role=MessageRole.USER, content="Hello! How are you?")
     
     # Add an assistant message
-    session.add_assistant_message("I'm an assistant. How can I help you?")
+    session.add_message(role=MessageRole.ASSISTANT, content="I'm an assistant. How can I help you?")
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
     print(f"Error: {e}")
 except InvalidSessionStateError as e:
     print(f"Error: {e}")
-```
+``` -->
 
-### Session – Retrieving Context
+<!-- ### Session – Retrieving Context
 
 ```python
 from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
@@ -190,7 +191,7 @@ except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
     print(f"Error: {e}")
-```
+``` -->
 
 ### Session – Process Session
 
@@ -207,23 +208,29 @@ except InvalidSessionStateError as e:
     print(f"Error: {e}")
 ```
 
-### Session – Get Status and Messages
+### Session – Getting Status
 
 ```python
 from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
-from recallrai.models import SessionStatus
 
 try:
     status = session.get_status()
     print("Session status:", status)
-    
-    # Check if the session is in a specific state
-    if status == SessionStatus.PROCESSED:
-        print("Session has been processed")
-    
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except SessionNotFoundError as e:
+    print(f"Error: {e}")
+```
+
+### Session – List Messages
+
+```python
+from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
+
+try:
     messages = session.get_messages()
-    for message in messages:
-        print(f"{message.role}: {message.content} at {message.timestamp}")
+    for msg in messages:
+        print(f"{msg.role.capitalize()}:(at {msg.timestamp}): {msg.content}")
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
@@ -256,7 +263,7 @@ except UserNotFoundError as e:
     print(f"Error: {e}")
 ```
 
-## Example Usage with LLMs
+<!-- ## Example Usage with LLMs
 
 ```python
 import openai
@@ -345,7 +352,7 @@ if __name__ == "__main__":
     # Start a new session
     session_id = chat_with_memory(user_id)
     print(f"To continue this conversation later, use session ID: {session_id}")
-```
+``` -->
 
 ## Exception Handling
 

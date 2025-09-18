@@ -199,6 +199,8 @@ class User:
         Args:
             offset: Number of records to skip
             limit: Maximum number of records to return
+            metadata_filter: Optional metadata filter for sessions
+            user_metadata_filter: Optional metadata filter for the user
 
         Returns:
             List of sessions with pagination info
