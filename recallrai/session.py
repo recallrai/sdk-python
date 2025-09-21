@@ -285,3 +285,6 @@ class Session:
             )
         
         return SessionMessagesList.from_api_response(response.json())
+
+    def __repr__(self) -> str:
+        return f"<Session id={self.session_id} user_id={self._user_id} status={self.status}>"

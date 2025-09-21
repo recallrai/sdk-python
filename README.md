@@ -315,6 +315,154 @@ except UserNotFoundError as e:
     print(f"Error: {e}")
 ```
 
+## Merge Conflict Management
+
+When RecallrAI processes sessions, it may detect conflicts between new memories and existing ones. The SDK provides comprehensive tools to handle these merge conflicts, allowing you to guide the resolution process through clarifying questions.
+
+### List Merge Conflicts
+
+```python
+from recallrai.exceptions import UserNotFoundError
+from recallrai.models import MergeConflictStatus
+
+try:
+    user = client.get_user("user123")
+    
+    # List all merge conflicts (with optional status filter)
+    conflicts = user.list_merge_conflicts(
+        offset=0,
+        limit=10,
+        status=MergeConflictStatus.PENDING,  # optional: filter by status
+        sort_by="created_at",  # created_at, resolved_at
+        sort_order="desc",  # asc, desc
+    )
+    
+    print(f"Total conflicts: {conflicts.total}")
+    print(f"Has more: {conflicts.has_more}")
+    
+    for conflict in conflicts.conflicts:
+        print(f"Conflict ID: {conflict.conflict_id}")
+        print(f"Status: {conflict.status}")
+        print(f"New memory: {conflict.new_memory_content}")
+        print(f"Conflicting memories: {len(conflict.conflicting_memories)}")
+        print(f"Questions: {len(conflict.clarifying_questions)}")
+        print(f"Created at: {conflict.created_at}")
+        print("---")
+        
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+```
+
+### Get a Specific Merge Conflict
+
+```python
+from recallrai.exceptions import UserNotFoundError, MergeConflictNotFoundError
+
+try:
+    user = client.get_user("user123")
+    conflict = user.get_merge_conflict("conflict-uuid")
+    
+    print(f"Conflict ID: {conflict.conflict_id}")
+    print(f"Status: {conflict.status.value}")
+    print(f"New memory content: {conflict.new_memory_content}")
+    
+    # Examine conflicting memories
+    print("\nConflicting memories:")
+    for memory in conflict.conflicting_memories:
+        print(f"  Content: {memory.content}")
+        print(f"  Reason: {memory.reason}")
+        print()
+    
+    # View clarifying questions
+    print("Clarifying questions:")
+    for question in conflict.clarifying_questions:
+        print(f"  Question: {question.question}")
+        print(f"  Options: {question.options}")
+        print()
+        
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except MergeConflictNotFoundError as e:
+    print(f"Error: {e}")
+```
+
+### Resolve a Merge Conflict
+
+```python
+from recallrai.exceptions import (
+    UserNotFoundError, 
+    MergeConflictNotFoundError,
+    MergeConflictAlreadyResolvedError,
+    ValidationError
+)
+from recallrai.models import MergeConflictAnswer
+
+try:
+    user = client.get_user("user123")
+    conflict = user.get_merge_conflict("conflict-uuid")
+    
+    # Prepare answers to the clarifying questions
+    answers = []
+    for question in conflict.clarifying_questions:
+        print(f"  Question: {question.question}")
+        print(f"  Options: {question.options}")
+        print()
+
+        answer = MergeConflictAnswer(
+            question=question.question,
+            answer=question.options[0],  # Select first option
+            message="User prefers this option based on recent conversation"
+        )
+        answers.append(answer)
+    
+    # Resolve the conflict
+    conflict.resolve(answers)
+    print(f"Conflict resolved! Status: {conflict.status}")
+    print(f"Resolved at: {conflict.resolved_at}")
+    
+    if conflict.resolution_data:
+        print(f"Resolution data: {conflict.resolution_data}")
+        
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except MergeConflictNotFoundError as e:
+    print(f"Error: {e}")
+except MergeConflictAlreadyResolvedError as e:
+    print(f"Error: {e}")
+except ValidationError as e:
+    print(f"Error: {e}")
+```
+
+### Refresh Merge Conflict Data
+
+```python
+from recallrai.exceptions import UserNotFoundError, MergeConflictNotFoundError
+
+try:
+    user = client.get_user("user123")
+    conflict = user.get_merge_conflict("conflict-uuid")
+    
+    # Refresh to get latest status from server
+    conflict.refresh()
+    print(f"Current status: {conflict.status}")
+    print(f"Last updated: {conflict.resolved_at}")
+    
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except MergeConflictNotFoundError as e:
+    print(f"Error: {e}")
+```
+
+### Working with Merge Conflict Statuses
+
+The merge conflict system uses several status values to track the lifecycle of conflicts:
+
+- **PENDING**: Conflict detected and waiting for resolution
+- **IN_QUEUE**: Conflict is queued for automated processing  
+- **RESOLVING**: Conflict is being processed
+- **RESOLVED**: Conflict has been successfully resolved
+- **FAILED**: Conflict resolution failed
+
 <!-- ## Example Usage with LLMs
 
 ```python
@@ -438,6 +586,12 @@ The RecallrAI SDK implements a comprehensive exception hierarchy to help you han
 - **SessionNotFoundError**: Raised when attempting to access a non-existent session.
 - **InvalidSessionStateError**: Occurs when performing an operation that's not valid for the current session state (e.g., adding a message to a processed session).
 
+### Merge Conflict-Related Errors
+
+- **MergeConflictError**: Base class for merge conflict-related exceptions.
+- **MergeConflictNotFoundError**: Raised when attempting to access a merge conflict that doesn't exist.
+- **MergeConflictAlreadyResolvedError**: Occurs when trying to resolve a merge conflict that has already been processed.
+
 ### Input Validation Errors
 
 - **ValidationError**: Raised when provided data doesn't meet the required format or constraints.
@@ -448,7 +602,12 @@ You can import exceptions directly from the `recallrai.exceptions` module:
 
 ```python
 # Import specific exceptions
-from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
+from recallrai.exceptions import (
+    UserNotFoundError, 
+    SessionNotFoundError,
+    MergeConflictNotFoundError,
+    MergeConflictAlreadyResolvedError
+)
 
 # Import all exceptions
 from recallrai.exceptions import (
@@ -463,7 +622,76 @@ from recallrai.exceptions import (
     UserNotFoundError, 
     UserAlreadyExistsError,
     ValidationError,
+    MergeConflictError,
+    MergeConflictNotFoundError,
+    MergeConflictAlreadyResolvedError,
 )
+```
+
+### Exception Hierarchy Diagram
+
+```mermaid
+flowchart LR
+    %% Title
+    title[Errors and Exceptions Hierarchy]
+    style title fill:none,stroke:none
+    
+    %% Base exception class
+    Exception[Exception]
+    RecallrAIError[RecallrAIError]
+    
+    %% First level exceptions
+    AuthenticationError[AuthenticationError]
+    NetworkError[NetworkError]
+    ServerError[ServerError]
+    UserError[UserError]
+    SessionError[SessionError]
+    MergeConflictError[MergeConflictError]
+    ValidationError[ValidationError]
+    
+    %% Second level exceptions - NetworkError children
+    TimeoutError[TimeoutError]
+    ConnectionError[ConnectionError]
+    
+    %% Second level exceptions - ServerError children
+    InternalServerError[Internal ServerError]
+    RateLimitError[RateLimitError]
+    
+    %% Second level exceptions - UserError children
+    UserNotFoundError[User NotFound Error]
+    UserAlreadyExistsError[User AlreadyExists Error]
+    
+    %% Second level exceptions - SessionError children
+    InvalidSessionStateError[Invalid SessionState Error]
+    SessionNotFoundError[Session NotFound Error]
+    
+    %% Second level exceptions - MergeConflictError children
+    MergeConflictNotFoundError[MergeConflict NotFound Error]
+    MergeConflictAlreadyResolvedError[MergeConflict AlreadyResolved Error]
+    
+    %% Connect parent to base
+    Exception --> RecallrAIError
+    
+    %% Connect base to first level
+    RecallrAIError --> AuthenticationError
+    RecallrAIError --> NetworkError
+    RecallrAIError --> ServerError
+    RecallrAIError --> UserError
+    RecallrAIError --> SessionError
+    RecallrAIError --> MergeConflictError
+    RecallrAIError --> ValidationError
+    
+    %% Connect first level to second level
+    NetworkError --> TimeoutError
+    NetworkError --> ConnectionError
+    ServerError --> InternalServerError
+    ServerError --> RateLimitError
+    UserError --> UserNotFoundError
+    UserError --> UserAlreadyExistsError
+    SessionError --> InvalidSessionStateError
+    SessionError --> SessionNotFoundError
+    MergeConflictError --> MergeConflictNotFoundError
+    MergeConflictError --> MergeConflictAlreadyResolvedError
 ```
 
 ### Best Practices for Error Handling
@@ -498,4 +726,4 @@ For more detailed information on specific exceptions, refer to the API documenta
 
 ## Conclusion
 
-This README outlines the basic usage of the RecallrAI SDK functions for user and session management. For additional documentation and advanced usage, please see the [official documentation](https://recallrai.com) or the source code repository on [GitHub](https://github.com/recallrai/sdk-python).
+This README outlines the basic usage of the RecallrAI SDK functions for user and session management. For additional documentation and advanced usage, please see the [official documentation](https://docs.recallrai.com) or the source code repository on [GitHub](https://github.com/recallrai/sdk-python).

@@ -1,0 +1,165 @@
+"""
+Merge conflict management functionality for the RecallrAI SDK.
+"""
+
+from typing import List
+from .utils import HTTPClient
+from .models import (
+    MergeConflictModel,
+    MergeConflictStatus,
+    MergeConflictAnswer,
+)
+from .exceptions import (
+    UserNotFoundError,
+    MergeConflictNotFoundError,
+    MergeConflictAlreadyResolvedError,
+    RecallrAIError
+)
+from logging import getLogger
+
+logger = getLogger(__name__)
+
+
+class MergeConflict:
+    """
+    Represents a merge conflict in the RecallrAI system.
+    
+    This class provides methods for inspecting and resolving merge conflicts
+    that occur when new memories conflict with existing ones.
+    """
+
+    def __init__(
+        self,
+        http_client: HTTPClient,
+        user_id: str,
+        conflict_data: MergeConflictModel,
+    ):
+        """
+        Initialize a merge conflict.
+
+        Args:
+            http_client: HTTP client for API communication
+            user_id: User ID who owns this conflict
+            conflict_data: Merge conflict data model
+        """
+        self._http = http_client
+        self.user_id = user_id
+        self._conflict_data = conflict_data
+        
+        # Expose key properties for easy access
+        self.conflict_id = conflict_data.id
+        self.status = conflict_data.status
+        self.new_memory_content = conflict_data.new_memory_content
+        self.conflicting_memories = conflict_data.conflicting_memories
+        self.clarifying_questions = conflict_data.clarifying_questions
+        self.created_at = conflict_data.created_at
+        self.resolved_at = conflict_data.resolved_at
+        self.resolution_data = conflict_data.resolution_data
+
+    def resolve(self, answers: List[MergeConflictAnswer]) -> None:
+        """
+        Resolve this merge conflict by providing answers to clarifying questions.
+
+        Args:
+            answers: List of answers to the clarifying questions
+
+        Raises:
+            UserNotFoundError: If the user is not found
+            MergeConflictNotFoundError: If the merge conflict is not found
+            MergeConflictAlreadyResolvedError: If the conflict is already resolved
+            ValidationError: If the answers are invalid
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
+        """
+        if self.status in [MergeConflictStatus.RESOLVED, MergeConflictStatus.FAILED]:
+            raise MergeConflictAlreadyResolvedError(conflict_id=self.conflict_id)
+
+        # Convert answers to the format expected by the API
+        answer_data = {
+            "question_answers": [
+                {
+                    "question": answer.question,
+                    "answer": answer.answer,
+                    "message": answer.message,
+                }
+                for answer in answers
+            ]
+        }
+
+        response = self._http.post(
+            f"/api/v1/users/{self.user_id}/merge-conflicts/{self.conflict_id}/resolve",
+            data={"answers": answer_data},
+        )
+
+        if response.status_code == 404:
+            # Check if it's a user not found or conflict not found error
+            detail = response.json().get('detail', '')
+            if f"User {self.user_id} not found" in detail:
+                raise UserNotFoundError(user_id=self.user_id)
+            else:
+                raise MergeConflictNotFoundError(conflict_id=self.conflict_id)
+        elif response.status_code == 400:
+            detail = response.json().get('detail', '')
+            if "already resolved" in detail:
+                raise MergeConflictAlreadyResolvedError(conflict_id=self.conflict_id)
+            else:
+                raise RecallrAIError(
+                    message=f"Failed to resolve merge conflict: {detail}",
+                    http_status=response.status_code
+                )
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=f"Failed to resolve merge conflict: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
+
+        # Update the conflict data with the response
+        updated_data = MergeConflictModel.from_api_response(response.json())
+        self._conflict_data = updated_data
+        self.status = updated_data.status
+        self.resolved_at = updated_data.resolved_at
+        self.resolution_data = updated_data.resolution_data
+
+    def refresh(self) -> None:
+        """
+        Refresh this merge conflict's data from the API.
+
+        Raises:
+            UserNotFoundError: If the user is not found
+            MergeConflictNotFoundError: If the merge conflict is not found
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
+        """
+        response = self._http.get(
+            f"/api/v1/users/{self.user_id}/merge-conflicts/{self.conflict_id}"
+        )
+
+        if response.status_code == 404:
+            # Check if it's a user not found or conflict not found error
+            detail = response.json().get('detail', '')
+            if f"User {self.user_id} not found" in detail:
+                raise UserNotFoundError(user_id=self.user_id)
+            else:
+                raise MergeConflictNotFoundError(conflict_id=self.conflict_id)
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=f"Failed to refresh merge conflict: {response.json().get('detail', 'Unknown error')}",
+                http_status=response.status_code
+            )
+
+        # Update with fresh data
+        updated_data = MergeConflictModel.from_api_response(response.json())
+        self._conflict_data = updated_data
+        self.status = updated_data.status
+        self.resolved_at = updated_data.resolved_at
+        self.resolution_data = updated_data.resolution_data
+
+    def __repr__(self) -> str:
+        """Return a string representation of the merge conflict."""
+        return f"MergeConflict(id='{self.conflict_id}', status='{self.status}', user_id='{self.user_id}')"

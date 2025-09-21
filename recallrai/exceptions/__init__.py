@@ -9,6 +9,7 @@ from .server import InternalServerError, RateLimitError
 from .sessions import SessionNotFoundError, InvalidSessionStateError
 from .users import UserNotFoundError, UserAlreadyExistsError
 from .validation import ValidationError
+from .merge_conflicts import MergeConflictError, MergeConflictNotFoundError, MergeConflictAlreadyResolvedError
 
 __all__ = [
     "RecallrAIError",
@@ -22,4 +23,7 @@ __all__ = [
     "UserNotFoundError", 
     "UserAlreadyExistsError",
     "ValidationError",
+    "MergeConflictError",
+    "MergeConflictNotFoundError",
+    "MergeConflictAlreadyResolvedError",
 ]
