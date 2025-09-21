@@ -131,30 +131,35 @@ class SessionList(BaseModel):
             has_more=data["has_more"],
         )
 
+class RecallStrategy(str, enum.Enum):
+    """
+    Type of recall strategy.
+    """
+    LOW_LATENCY = "low_latency"
+    BALANCED = "balanced"
+    DEEP = "deep"
 
-# class Context(BaseModel):
-#     """
-#     Represents the context for a session.
-#     """
-#     memory_used: bool = Field(..., description="Whether memory was used to generate the context")
-#     context: str = Field(..., description="The context for the session")
+class Context(BaseModel):
+    """
+    Represents the context for a session.
+    """
+    context: str = Field(..., description="The context for the session")
 
-#     class Config:
-#         """Pydantic configuration."""
-#         frozen = True
+    class Config:
+        """Pydantic configuration."""
+        frozen = True
 
-#     @classmethod
-#     def from_api_response(cls, data: Dict[str, Any]) -> "Context":
-#         """
-#         Create a Context instance from an API response.
+    @classmethod
+    def from_api_response(cls, data: Dict[str, Any]) -> "Context":
+        """
+        Create a Context instance from an API response.
 
-#         Args:
-#             data: API response data
+        Args:
+            data: API response data
 
-#         Returns:
-#             A Context instance
-#         """
-#         return cls(
-#             memory_used=data["memory_used"],
-#             context=data["context"],
-#         )
+        Returns:
+            A Context instance
+        """
+        return cls(
+            context=data["context"],
+        )
