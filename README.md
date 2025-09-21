@@ -220,7 +220,7 @@ except UserNotFoundError as e:
     print(f"Error: {e}")
 ```
 
-<!-- ### Session – Adding Messages
+### Session – Adding Messages
 
 ```python
 from recallrai.exceptions import UserNotFoundError, SessionNotFoundError, InvalidSessionStateError
@@ -232,28 +232,42 @@ try:
     
     # Add an assistant message
     session.add_message(role=MessageRole.ASSISTANT, content="I'm an assistant. How can I help you?")
+    
+    # Available message roles:
+    # - MessageRole.USER: Messages from the user/human
+    # - MessageRole.ASSISTANT: Messages from the AI assistant
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
     print(f"Error: {e}")
 except InvalidSessionStateError as e:
     print(f"Error: {e}")
-``` -->
+```
 
-<!-- ### Session – Retrieving Context
+### Session – Retrieving Context
 
 ```python
 from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
+from recallrai.models import RecallStrategy
 
 try:
+    # Get context with default balanced strategy
     context = session.get_context()
-    print("Memory used:", context.memory_used)
     print("Context:", context.context)
+    
+    # Get context with specific recall strategy
+    context = session.get_context(recall_strategy=RecallStrategy.LOW_LATENCY)
+    print("Context:", context.context)
+    
+    # Available recall strategies:
+    # - RecallStrategy.LOW_LATENCY: Fast retrieval with basic relevance
+    # - RecallStrategy.BALANCED: Good balance of speed and quality (default)
+    # - RecallStrategy.DEEP: More thorough but slower memory search
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
     print(f"Error: {e}")
-``` -->
+```
 
 ### Session – Process Session
 
@@ -479,12 +493,13 @@ The merge conflict system uses several status values to track the lifecycle of c
 - **RESOLVED**: Conflict has been successfully resolved
 - **FAILED**: Conflict resolution failed
 
-<!-- ## Example Usage with LLMs
+## Example Usage with LLMs
 
 ```python
 import openai
 from recallrai import RecallrAI
 from recallrai.exceptions import UserNotFoundError
+from recallrai.models import MessageRole
 
 # Initialize RecallrAI and OpenAI clients
 rai_client = RecallrAI(
@@ -516,10 +531,11 @@ def chat_with_memory(user_id, session_id=None):
             break
         
         # Add the user message to RecallrAI
-        session.add_user_message(user_message)
+        session.add_message(role=MessageRole.USER, content=user_message)
         
         # Get context from RecallrAI after adding the user message
-        context = session.get_context()
+        # You can specify a recall strategy for different performance/quality trade-offs
+        context = session.get_context()  # Uses default BALANCED strategy
         
         # Create a system prompt that includes the context
         system_prompt = f"""You are a helpful assistant with memory of previous conversations.
@@ -550,7 +566,7 @@ def chat_with_memory(user_id, session_id=None):
         print(f"Assistant: {assistant_message}")
         
         # Add the assistant's response to RecallrAI
-        session.add_assistant_message(assistant_message)
+        session.add_message(role=MessageRole.ASSISTANT, content=assistant_message)
     
     # Process the session at the end of the conversation
     print("Processing session to update memory...")
@@ -568,7 +584,7 @@ if __name__ == "__main__":
     # Start a new session
     session_id = chat_with_memory(user_id)
     print(f"To continue this conversation later, use session ID: {session_id}")
-``` -->
+```
 
 ## Exception Handling
 
