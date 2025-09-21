@@ -393,6 +393,9 @@ from recallrai.exceptions import (
     UserNotFoundError, 
     MergeConflictNotFoundError,
     MergeConflictAlreadyResolvedError,
+    MergeConflictInvalidQuestionsError,
+    MergeConflictMissingAnswersError,
+    MergeConflictInvalidAnswerError,
     ValidationError
 )
 from recallrai.models import MergeConflictAnswer
@@ -429,6 +432,19 @@ except MergeConflictNotFoundError as e:
     print(f"Error: {e}")
 except MergeConflictAlreadyResolvedError as e:
     print(f"Error: {e}")
+except MergeConflictInvalidQuestionsError as e:
+    print(f"Error: {e}")
+    if e.invalid_questions:
+        print(f"Invalid questions: {e.invalid_questions}")
+except MergeConflictMissingAnswersError as e:
+    print(f"Error: {e}")
+    if e.missing_questions:
+        print(f"Missing answers for: {e.missing_questions}")
+except MergeConflictInvalidAnswerError as e:
+    print(f"Error: {e}")
+    if e.question and e.valid_options:
+        print(f"Question: {e.question}")
+        print(f"Valid options: {e.valid_options}")
 except ValidationError as e:
     print(f"Error: {e}")
 ```
@@ -591,6 +607,9 @@ The RecallrAI SDK implements a comprehensive exception hierarchy to help you han
 - **MergeConflictError**: Base class for merge conflict-related exceptions.
 - **MergeConflictNotFoundError**: Raised when attempting to access a merge conflict that doesn't exist.
 - **MergeConflictAlreadyResolvedError**: Occurs when trying to resolve a merge conflict that has already been processed.
+- **MergeConflictInvalidQuestionsError**: Raised when the provided questions don't match the original clarifying questions.
+- **MergeConflictMissingAnswersError**: Occurs when not all required clarifying questions have been answered.
+- **MergeConflictInvalidAnswerError**: Raised when an answer is not one of the valid options for a question.
 
 ### Input Validation Errors
 
@@ -606,7 +625,10 @@ from recallrai.exceptions import (
     UserNotFoundError, 
     SessionNotFoundError,
     MergeConflictNotFoundError,
-    MergeConflictAlreadyResolvedError
+    MergeConflictAlreadyResolvedError,
+    MergeConflictInvalidQuestionsError,
+    MergeConflictMissingAnswersError,
+    MergeConflictInvalidAnswerError,
 )
 
 # Import all exceptions
@@ -625,6 +647,9 @@ from recallrai.exceptions import (
     MergeConflictError,
     MergeConflictNotFoundError,
     MergeConflictAlreadyResolvedError,
+    MergeConflictInvalidQuestionsError,
+    MergeConflictMissingAnswersError,
+    MergeConflictInvalidAnswerError,
 )
 ```
 
@@ -668,6 +693,9 @@ flowchart LR
     %% Second level exceptions - MergeConflictError children
     MergeConflictNotFoundError[MergeConflict NotFound Error]
     MergeConflictAlreadyResolvedError[MergeConflict AlreadyResolved Error]
+    MergeConflictInvalidQuestionsError[MergeConflict InvalidQuestions Error]
+    MergeConflictMissingAnswersError[MergeConflict MissingAnswers Error]
+    MergeConflictInvalidAnswerError[MergeConflict InvalidAnswer Error]
     
     %% Connect parent to base
     Exception --> RecallrAIError
@@ -692,6 +720,9 @@ flowchart LR
     SessionError --> SessionNotFoundError
     MergeConflictError --> MergeConflictNotFoundError
     MergeConflictError --> MergeConflictAlreadyResolvedError
+    MergeConflictError --> MergeConflictInvalidQuestionsError
+    MergeConflictError --> MergeConflictMissingAnswersError
+    MergeConflictError --> MergeConflictInvalidAnswerError
 ```
 
 ### Best Practices for Error Handling

@@ -13,6 +13,9 @@ from .exceptions import (
     UserNotFoundError,
     MergeConflictNotFoundError,
     MergeConflictAlreadyResolvedError,
+    MergeConflictInvalidQuestionsError,
+    MergeConflictMissingAnswersError,
+    MergeConflictInvalidAnswerError,
     RecallrAIError
 )
 from logging import getLogger
@@ -67,6 +70,9 @@ class MergeConflict:
             UserNotFoundError: If the user is not found
             MergeConflictNotFoundError: If the merge conflict is not found
             MergeConflictAlreadyResolvedError: If the conflict is already resolved
+            MergeConflictInvalidQuestionsError: If the provided questions don't match the original questions
+            MergeConflictMissingAnswersError: If not all required questions have been answered
+            MergeConflictInvalidAnswerError: If an answer is not a valid option for its question
             ValidationError: If the answers are invalid
             AuthenticationError: If the API key or project ID is invalid
             InternalServerError: If the server encounters an error
@@ -105,6 +111,57 @@ class MergeConflict:
             detail = response.json().get('detail', '')
             if "already resolved" in detail:
                 raise MergeConflictAlreadyResolvedError(conflict_id=self.conflict_id)
+            elif "Invalid questions provided" in detail:
+                # Extract invalid questions from the error message if possible
+                import re
+                match = re.search(r"The following questions do not match the original questions: (.+)", detail)
+                invalid_questions = None
+                if match:
+                    try:
+                        invalid_questions = eval(match.group(1))  # Parse the list from string
+                    except:
+                        pass
+                raise MergeConflictInvalidQuestionsError(
+                    invalid_questions=invalid_questions,
+                    conflict_id=self.conflict_id,
+                    message=detail
+                )
+            elif "Missing answers for the following questions" in detail:
+                # Extract missing questions from the error message if possible
+                import re
+                match = re.search(r"Missing answers for the following questions: (.+)", detail)
+                missing_questions = None
+                if match:
+                    try:
+                        missing_questions = eval(match.group(1))  # Parse the list from string
+                    except:
+                        pass
+                raise MergeConflictMissingAnswersError(
+                    missing_questions=missing_questions,
+                    conflict_id=self.conflict_id,
+                    message=detail
+                )
+            elif "Invalid answer" in detail and "for question" in detail:
+                # Extract question, answer, and valid options from the error message
+                import re
+                match = re.search(r"Invalid answer '(.+?)' for question '(.+?)'\. Valid options are: (.+)", detail)
+                invalid_answer = None
+                question = None
+                valid_options = None
+                if match:
+                    try:
+                        invalid_answer = match.group(1)
+                        question = match.group(2)
+                        valid_options = eval(match.group(3))  # Parse the list from string
+                    except:
+                        pass
+                raise MergeConflictInvalidAnswerError(
+                    question=question,
+                    invalid_answer=invalid_answer,
+                    valid_options=valid_options,
+                    conflict_id=self.conflict_id,
+                    message=detail
+                )
             else:
                 raise RecallrAIError(
                     message=f"Failed to resolve merge conflict: {detail}",

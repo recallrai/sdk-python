@@ -9,7 +9,14 @@ from .server import InternalServerError, RateLimitError
 from .sessions import SessionNotFoundError, InvalidSessionStateError
 from .users import UserNotFoundError, UserAlreadyExistsError
 from .validation import ValidationError
-from .merge_conflicts import MergeConflictError, MergeConflictNotFoundError, MergeConflictAlreadyResolvedError
+from .merge_conflicts import (
+    MergeConflictError, 
+    MergeConflictNotFoundError, 
+    MergeConflictAlreadyResolvedError,
+    MergeConflictInvalidQuestionsError,
+    MergeConflictMissingAnswersError,
+    MergeConflictInvalidAnswerError,
+)
 
 __all__ = [
     "RecallrAIError",
@@ -26,4 +33,7 @@ __all__ = [
     "MergeConflictError",
     "MergeConflictNotFoundError",
     "MergeConflictAlreadyResolvedError",
+    "MergeConflictInvalidQuestionsError",
+    "MergeConflictMissingAnswersError",
+    "MergeConflictInvalidAnswerError",
 ]
