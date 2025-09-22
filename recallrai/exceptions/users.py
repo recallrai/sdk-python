@@ -59,3 +59,26 @@ class UserAlreadyExistsError(UserError):
         message = message or f"User{f' {user_id}' if user_id else ''} already exists"
         super().__init__(message, code, http_status, details)
         self.user_id = user_id
+
+class InvalidCategoriesError(UserError):
+    """
+    Raised when invalid categories are provided for user memories.
+    
+    This exception is typically raised when trying to filter memories
+    by categories that don't exist in the project.
+    """
+    def __init__(
+        self, 
+        invalid_categories: Optional[list] = None,
+        message: Optional[str] = None,
+        code: str = "invalid_categories",
+        http_status: int = 400,
+        details: Optional[Dict[str, Any]] = None
+    ):
+        if invalid_categories and not message:
+            categories_str = ", ".join(invalid_categories)
+            message = f"The following categories do not exist: {categories_str}"
+        else:
+            message = message or "Invalid categories provided"
+        super().__init__(message, code, http_status, details)
+        self.invalid_categories = invalid_categories or []

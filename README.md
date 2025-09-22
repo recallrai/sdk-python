@@ -308,7 +308,7 @@ except SessionNotFoundError as e:
 ### List User Memories (with optional category filters)
 
 ```python
-from recallrai.exceptions import UserNotFoundError
+from recallrai.exceptions import UserNotFoundError, InvalidCategoriesError
 
 try:
     user = client.get_user("user123")
@@ -326,6 +326,9 @@ try:
     print(f"Has more?: {memories.has_more}")
     print(f"Total memories: {memories.total}")
 except UserNotFoundError as e:
+    print(f"Error: {e}")
+except InvalidCategoriesError as e:
+    print(f"Invalid categories: {e.invalid_categories}")
     print(f"Error: {e}")
 ```
 
@@ -612,6 +615,7 @@ The RecallrAI SDK implements a comprehensive exception hierarchy to help you han
 
 - **UserNotFoundError**: Raised when attempting to access a user that doesn't exist.
 - **UserAlreadyExistsError**: Occurs when creating a user with an ID that already exists.
+- **InvalidCategoriesError**: Raised when filtering user memories by categories that do not exist in the project. The exception contains the list of invalid categories in `e.invalid_categories`.
 
 ### Session-Related Errors
 
@@ -640,6 +644,7 @@ You can import exceptions directly from the `recallrai.exceptions` module:
 from recallrai.exceptions import (
     UserNotFoundError, 
     SessionNotFoundError,
+    InvalidCategoriesError,
     MergeConflictNotFoundError,
     MergeConflictAlreadyResolvedError,
     MergeConflictInvalidQuestionsError,
@@ -659,6 +664,7 @@ from recallrai.exceptions import (
     InvalidSessionStateError,
     UserNotFoundError, 
     UserAlreadyExistsError,
+    InvalidCategoriesError,
     ValidationError,
     MergeConflictError,
     MergeConflictNotFoundError,

@@ -7,7 +7,7 @@ from .auth import AuthenticationError
 from .network import TimeoutError, ConnectionError
 from .server import InternalServerError, RateLimitError
 from .sessions import SessionNotFoundError, InvalidSessionStateError
-from .users import UserNotFoundError, UserAlreadyExistsError
+from .users import UserNotFoundError, UserAlreadyExistsError, InvalidCategoriesError
 from .validation import ValidationError
 from .merge_conflicts import (
     MergeConflictError, 
@@ -29,6 +29,7 @@ __all__ = [
     "InvalidSessionStateError",
     "UserNotFoundError", 
     "UserAlreadyExistsError",
+    "InvalidCategoriesError",
     "ValidationError",
     "MergeConflictError",
     "MergeConflictNotFoundError",

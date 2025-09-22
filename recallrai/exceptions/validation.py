@@ -2,7 +2,7 @@
 Validation-related exceptions for the RecallrAI SDK.
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 from .base import RecallrAIError
 
 

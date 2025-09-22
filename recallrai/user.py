@@ -19,6 +19,7 @@ from .merge_conflict import MergeConflict
 from .exceptions import (
     UserNotFoundError,
     UserAlreadyExistsError,
+    InvalidCategoriesError,
     SessionNotFoundError,
     MergeConflictNotFoundError,
     RecallrAIError
@@ -315,6 +316,16 @@ class User:
 
         if response.status_code == 404:
             raise UserNotFoundError(user_id=self.user_id)
+        elif response.status_code == 400:
+            # Backend returns 400 for invalid categories
+            detail = response.json().get('detail', '')
+            invalid_categories = response.json().get('invalid_categories')
+            raise InvalidCategoriesError(
+                invalid_categories=invalid_categories,
+                message=detail,
+                http_status=400,
+                details=response.json()
+            )
         elif response.status_code != 200:
             raise RecallrAIError(
                 message=f"Failed to list memories: {response.json().get('detail', 'Unknown error')}",
