@@ -103,3 +103,39 @@ class UserMemoriesList(BaseModel):
             total=data["total"],
             has_more=data["has_more"],
         )
+
+
+class UserMessage(BaseModel):
+    """Represents a single message from a user's conversation history."""
+
+    role: str = Field(..., description="Role of the message sender (user or assistant)")
+    content: str = Field(..., description="Content of the message")
+    timestamp: datetime = Field(..., description="When the message was sent")
+    session_id: str = Field(..., description="ID of the session this message belongs to")
+
+    class Config:
+        frozen = True
+        json_encoders = {
+            datetime: lambda dt: dt.isoformat()
+        }
+
+
+class UserMessagesList(BaseModel):
+    """Represents a list of user messages."""
+
+    messages: List[UserMessage] = Field(..., description="List of user messages")
+
+    @classmethod
+    def from_api_response(cls, data: Dict[str, Any]) -> "UserMessagesList":
+        """
+        Create a UserMessagesList instance from an API response.
+
+        Args:
+            data: API response data
+
+        Returns:
+            A UserMessagesList instance
+        """
+        return cls(
+            messages=[UserMessage(**message) for message in data["messages"]]
+        )

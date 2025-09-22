@@ -284,7 +284,6 @@ except InvalidSessionStateError as e:
     print(f"Error: {e}")
 ```
 
-
 ### Session – List Messages
 
 ```python
@@ -294,7 +293,7 @@ try:
     # Paginated retrieval
     messages = session.get_messages(offset=0, limit=50)
     for msg in messages.messages:
-        print(f"{msg.role.value.capitalize()} (at {msg.timestamp}): {msg.content}")
+        print(f"{msg.role.value.upper()} (at {msg.timestamp}): {msg.content}")
     print(f"Has more?: {messages.has_more}")
     print(f"Total messages: {messages.total}")
 except UserNotFoundError as e:
@@ -329,6 +328,30 @@ except UserNotFoundError as e:
     print(f"Error: {e}")
 except InvalidCategoriesError as e:
     print(f"Invalid categories: {e.invalid_categories}")
+    print(f"Error: {e}")
+```
+
+## User Messages
+
+### Get Last N Messages
+
+Retrieve the most recent messages for a user across all their sessions. This is particularly useful for chatbot applications where you need conversation context, such as WhatsApp support bots where you want to pass the last few messages to understand the ongoing conversation.
+
+```python
+from recallrai.exceptions import UserNotFoundError
+
+try:
+    user = client.get_user("user123")
+    
+    # Fetch last N messages (e.g., last 5)
+    messages = user.get_last_n_messages(n=5)
+    
+    for msg in messages.messages:
+        print(f"Session ID: {msg.session_id}")
+        print(f"{msg.role.upper()} (at {msg.timestamp}): {msg.content}")
+        print("---")
+
+except UserNotFoundError as e:
     print(f"Error: {e}")
 ```
 

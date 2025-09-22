@@ -10,6 +10,7 @@ from .models import (
     SessionModel, 
     SessionList, 
     UserMemoriesList, 
+    UserMessagesList,
     MergeConflictList, 
     MergeConflictStatus,
     MergeConflictModel,
@@ -430,6 +431,47 @@ class User:
 
         conflict_data = MergeConflictModel.from_api_response(response.json())
         return MergeConflict(self._http, self.user_id, conflict_data)
+
+    def get_last_n_messages(self, n: int) -> UserMessagesList:
+        """
+        Get the last N messages for this user across all their sessions.
+
+        This method is useful for chatbot applications where you want to see
+        the recent conversation history for context.
+
+        Args:
+            n: Number of recent messages to retrieve (1-100, default: 10)
+
+        Returns:
+            UserMessagesList: List of the most recent messages
+
+        Raises:
+            UserNotFoundError: If the user is not found
+            AuthenticationError: If the API key or project ID is invalid
+            InternalServerError: If the server encounters an error
+            NetworkError: If there are network issues
+            TimeoutError: If the request times out
+            RecallrAIError: For other API-related errors
+            ValueError: If n is not between 1 and 100
+        """
+        if not (1 <= n <= 100):
+            raise ValueError("n must be between 1 and 100")
+        
+        response = self._http.get(
+            f"/api/v1/users/{self.user_id}/messages",
+            params={"limit": n}
+        )
+        
+        if response.status_code == 404:
+            detail = response.json().get("detail", f"User with ID {self.user_id} not found")
+            raise UserNotFoundError(message=detail, http_status=response.status_code)
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=response.json().get('detail', 'Unknown error'),
+                http_status=response.status_code
+            )
+        
+        return UserMessagesList.from_api_response(response.json())
 
     def __repr__(self) -> str:
         return f"<User id={self.user_id} created_at={self.created_at} last_active_at={self.last_active_at}>"

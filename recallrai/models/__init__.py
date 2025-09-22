@@ -1,7 +1,7 @@
 """
 Models used in the SDK.
 """
-from .user import UserModel, UserList, UserMemoriesList
+from .user import UserModel, UserList, UserMemoriesList, UserMessage, UserMessagesList
 from .session import SessionModel, SessionList, SessionMessagesList, MessageRole, SessionStatus, Context, RecallStrategy
 from .merge_conflict import (
     MergeConflictModel, 
@@ -16,6 +16,8 @@ __all__ = [
     "UserModel",
     "UserList",
     "UserMemoriesList",
+    "UserMessage",
+    "UserMessagesList",
 
     "SessionModel",
     "SessionList",
