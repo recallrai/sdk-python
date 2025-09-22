@@ -81,12 +81,14 @@ class User:
         response = self._http.put(f"/api/v1/users/{self.user_id}", data=data)
         
         if response.status_code == 404:
-            raise UserNotFoundError(user_id=self.user_id)
+            detail = response.json().get("detail", f"User with ID {self.user_id} not found")
+            raise UserNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code == 409:
-            raise UserAlreadyExistsError(user_id=new_user_id)
+            detail = response.json().get("detail", f"User with ID {new_user_id} already exists")
+            raise UserAlreadyExistsError(message=detail, http_status=response.status_code)
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to update user: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
             
@@ -113,10 +115,11 @@ class User:
         response = self._http.get(f"/api/v1/users/{self.user_id}")
         
         if response.status_code == 404:
-            raise UserNotFoundError(user_id=self.user_id)
+            detail = response.json().get("detail", f"User with ID {self.user_id} not found")
+            raise UserNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to refresh user: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
         
@@ -144,10 +147,11 @@ class User:
         response = self._http.delete(f"/api/v1/users/{self.user_id}")
         
         if response.status_code == 404:
-            raise UserNotFoundError(user_id=self.user_id)
+            detail = response.json().get("detail", f"User with ID {self.user_id} not found")
+            raise UserNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 204:
             raise RecallrAIError(
-                message=f"Failed to delete user: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
 
@@ -184,10 +188,11 @@ class User:
         )
         
         if response.status_code == 404:
-            raise UserNotFoundError(user_id=self.user_id)
+            detail = response.json().get("detail", f"User {self.user_id} not found")
+            raise UserNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 201:
             raise RecallrAIError(
-                message=f"Failed to create session: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
         
@@ -220,12 +225,12 @@ class User:
             # Check if it's a user not found or session not found error
             detail = response.json().get('detail', '')
             if f"User {self.user_id} not found" in detail:
-                raise UserNotFoundError(user_id=self.user_id)
+                raise UserNotFoundError(message=detail, http_status=response.status_code)
             else:
-                raise SessionNotFoundError(session_id=session_id)
+                raise SessionNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to get session: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
         
@@ -271,10 +276,11 @@ class User:
         )
         
         if response.status_code == 404:
-            raise UserNotFoundError(user_id=self.user_id)
+            detail = response.json().get("detail", f"User {self.user_id} not found")
+            raise UserNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to list sessions: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
             
@@ -315,20 +321,18 @@ class User:
         )
 
         if response.status_code == 404:
-            raise UserNotFoundError(user_id=self.user_id)
+            detail = response.json().get("detail", f"User {self.user_id} not found")
+            raise UserNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code == 400:
             # Backend returns 400 for invalid categories
-            detail = response.json().get('detail', '')
-            invalid_categories = response.json().get('invalid_categories')
+            detail = response.json().get('detail', 'Invalid categories provided')
             raise InvalidCategoriesError(
-                invalid_categories=invalid_categories,
                 message=detail,
-                http_status=400,
-                details=response.json()
+                http_status=response.status_code
             )
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to list memories: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code,
             )
 
@@ -378,10 +382,11 @@ class User:
         )
 
         if response.status_code == 404:
-            raise UserNotFoundError(user_id=self.user_id)
+            detail = response.json().get("detail", f"User {self.user_id} not found")
+            raise UserNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to list merge conflicts: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code,
             )
 
@@ -414,12 +419,12 @@ class User:
             # Check if it's a user not found or conflict not found error
             detail = response.json().get('detail', '')
             if f"User {self.user_id} not found" in detail:
-                raise UserNotFoundError(user_id=self.user_id)
+                raise UserNotFoundError(message=detail, http_status=response.status_code)
             else:
-                raise MergeConflictNotFoundError(conflict_id=conflict_id)
+                raise MergeConflictNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to get merge conflict: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
 

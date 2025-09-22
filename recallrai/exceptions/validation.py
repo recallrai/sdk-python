@@ -2,7 +2,6 @@
 Validation-related exceptions for the RecallrAI SDK.
 """
 
-from typing import Any, Dict, Optional
 from .base import RecallrAIError
 
 
@@ -14,11 +13,5 @@ class ValidationError(RecallrAIError):
     due to invalid or missing parameters.
     """
 
-    def __init__(
-        self, 
-        message: str = "Validation error", 
-        code: str = "validation_error",
-        http_status: int = 422,
-        details: Optional[Dict[str, Any]] = None
-    ):
-        super().__init__(message, code, http_status, details)
+    def __init__(self, message: str, http_status: int):
+        super().__init__(message, http_status)

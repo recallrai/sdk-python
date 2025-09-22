@@ -82,23 +82,35 @@ class HTTPClient:
                 json=data,
             )
             if response.status_code == 422:
+                detail = response.json().get("detail", "Validation error")
                 raise ValidationError(
-                    details=response.json()["detail"],
+                    message=detail,
+                    http_status=response.status_code
                 )
             elif response.status_code == 500:
+                detail = response.json().get("detail", "Internal server error")
                 raise InternalServerError(
-                    details=response.json()["detail"],
+                    message=detail,
+                    http_status=response.status_code
                 )
             elif response.status_code == 401:
+                detail = response.json().get("detail", "Authentication failed")
                 raise AuthenticationError(
-                    details=response.json()["detail"],
+                    message=detail,
+                    http_status=response.status_code
                 )
             
             return response
         except TimeoutException as e:
-            raise TimeoutError(f"Request timed out: {e}")
+            raise TimeoutError(
+                message=f"Request timed out: {e}",
+                http_status=0  # No HTTP status for timeout
+            )
         except ConnectError as e:
-            raise ConnectionError(f"Failed to connect to the API: {e}")
+            raise ConnectionError(
+                message=f"Failed to connect to the API: {e}",
+                http_status=0  # No HTTP status for connection error
+            )
         except Exception as e:
             # Handle other exceptions as needed
             raise e

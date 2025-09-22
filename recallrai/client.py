@@ -77,9 +77,11 @@ class RecallrAI:
         """
         response = self._http.post("/api/v1/users", data={"user_id": user_id, "metadata": metadata or {}})
         if response.status_code == 409:
-            raise UserAlreadyExistsError(user_id=user_id)
+            detail = response.json().get("detail", f"User with ID {user_id} already exists")
+            raise UserAlreadyExistsError(message=detail, http_status=response.status_code)
         elif response.status_code != 201:
-            raise RecallrAIError("Failed to create user", http_status=response.status_code)
+            detail = response.json().get("detail", "Failed to create user")
+            raise RecallrAIError(message=detail, http_status=response.status_code)
         user_data = UserModel.from_api_response(response.json())
         return User(self._http, user_data)
 
@@ -103,9 +105,11 @@ class RecallrAI:
         """
         response = self._http.get(f"/api/v1/users/{user_id}")
         if response.status_code == 404:
-            raise UserNotFoundError(user_id=user_id)
+            detail = response.json().get("detail", f"User with ID {user_id} not found")
+            raise UserNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 200:
-            raise RecallrAIError("Failed to retrieve user", http_status=response.status_code)
+            detail = response.json().get("detail", "Failed to retrieve user")
+            raise RecallrAIError(message=detail, http_status=response.status_code)
         user_data = UserModel.from_api_response(response.json())
         return User(self._http, user_data)
 
@@ -138,5 +142,6 @@ class RecallrAI:
 
         response = self._http.get("/api/v1/users", params=params)
         if response.status_code != 200:
-            raise RecallrAIError("Failed to list users", http_status=response.status_code)
+            detail = response.json().get("detail", "Failed to list users")
+            raise RecallrAIError(message=detail, http_status=response.status_code)
         return UserList.from_api_response(response.json(), self._http)

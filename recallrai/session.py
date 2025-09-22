@@ -79,16 +79,18 @@ class Session:
             # Check if it's a user not found or session not found error
             detail = response.json().get('detail', '')
             if f"User {self._user_id} not found" in detail:
-                raise UserNotFoundError(user_id=self._user_id)
+                raise UserNotFoundError(message=detail, http_status=response.status_code)
             else:
-                raise SessionNotFoundError(session_id=self.session_id)
+                raise SessionNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code == 400:
+            detail = response.json().get('detail', f"Cannot add message to session with status {self.status}")
             raise InvalidSessionStateError(
-                message=f"Cannot add message to session with status {self.status}",
+                message=detail,
+                http_status=response.status_code
             )
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to add message: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
 
@@ -120,12 +122,12 @@ class Session:
             # Check if it's a user not found or session not found error
             detail = response.json().get('detail', '')
             if f"User {self._user_id} not found" in detail:
-                raise UserNotFoundError(user_id=self._user_id)
+                raise UserNotFoundError(message=detail, http_status=response.status_code)
             else:
-                raise SessionNotFoundError(session_id=self.session_id)
+                raise SessionNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to get context: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
         if self.status == SessionStatus.PROCESSED:
@@ -159,12 +161,12 @@ class Session:
             # Check if it's a user not found or session not found error
             detail = response.json().get('detail', '')
             if f"User {self._user_id} not found" in detail:
-                raise UserNotFoundError(user_id=self._user_id)
+                raise UserNotFoundError(message=detail, http_status=response.status_code)
             else:
-                raise SessionNotFoundError(session_id=self.session_id)
+                raise SessionNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to update session: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
         
@@ -195,12 +197,12 @@ class Session:
             # Check if it's a user not found or session not found error
             detail = response.json().get('detail', '')
             if f"User {self._user_id} not found" in detail:
-                raise UserNotFoundError(user_id=self._user_id)
+                raise UserNotFoundError(message=detail, http_status=response.status_code)
             else:
-                raise SessionNotFoundError(session_id=self.session_id)
+                raise SessionNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to refresh session: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
         
@@ -234,16 +236,18 @@ class Session:
             # Check if it's a user not found or session not found error
             detail = response.json().get('detail', '')
             if f"User {self._user_id} not found" in detail:
-                raise UserNotFoundError(user_id=self._user_id)
+                raise UserNotFoundError(message=detail, http_status=response.status_code)
             else:
-                raise SessionNotFoundError(session_id=self.session_id)
+                raise SessionNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code == 400:
+            detail = response.json().get('detail', f'Cannot process session with status {self.status}')
             raise InvalidSessionStateError(
-                message=f"{response.json().get('detail', f'Cannot process session with status {self.status}')}."
+                message=detail,
+                http_status=response.status_code
             )
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to process session: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
 
@@ -276,12 +280,12 @@ class Session:
             # Check if it's a user not found or session not found error
             detail = response.json().get('detail', '')
             if f"User {self._user_id} not found" in detail:
-                raise UserNotFoundError(user_id=self._user_id)
+                raise UserNotFoundError(message=detail, http_status=response.status_code)
             else:
-                raise SessionNotFoundError(session_id=self.session_id)
+                raise SessionNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to get messages: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
         

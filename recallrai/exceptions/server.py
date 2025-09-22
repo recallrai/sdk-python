@@ -2,7 +2,6 @@
 Server-related exceptions for the RecallrAI SDK.
 """
 
-from typing import Any, Dict, Optional
 from .base import RecallrAIError
 
 
@@ -13,14 +12,8 @@ class ServerError(RecallrAIError):
     This exception serves as the base for all exceptions related to
     server-side errors in the RecallrAI API.
     """
-    def __init__(
-        self, 
-        message: str = "Server error occurred", 
-        code: str = "server_error",
-        http_status: int = 500,
-        details: Optional[Dict[str, Any]] = None
-    ):
-        super().__init__(message, code, http_status, details)
+    def __init__(self, message: str, http_status: int):
+        super().__init__(message, http_status)
 
 class InternalServerError(ServerError):
     """
@@ -29,14 +22,8 @@ class InternalServerError(ServerError):
     This exception is typically raised when the API returns a 5xx error code.
     """
 
-    def __init__(
-        self, 
-        message: str = "Internal server error", 
-        code: str = "server_error",
-        http_status: int = 500,
-        details: Optional[Dict[str, Any]] = None
-    ):
-        super().__init__(message, code, http_status, details)
+    def __init__(self, message: str, http_status: int):
+        super().__init__(message, http_status)
 
 class RateLimitError(ServerError):
     """
@@ -46,20 +33,8 @@ class RateLimitError(ServerError):
     short period of time.
     """
 
-    def __init__(
-        self,
-        message: str = "API rate limit exceeded",
-        code: str = "rate_limit_exceeded",
-        http_status: int = 429,
-        retry_after: Optional[int] = None,
-        details: Optional[Dict[str, Any]] = None,
-    ):
-        details = details or {}
-        if retry_after is not None:
-            details["retry_after"] = retry_after
-        super().__init__(message, code, http_status, details)
-        self.retry_after = retry_after
-
+    def __init__(self, message: str, http_status: int):
+        super().__init__(message, http_status)
 
 # class ServiceUnavailableError(ServerError):
 #     """

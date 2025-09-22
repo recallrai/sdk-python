@@ -2,7 +2,6 @@
 Network-related exceptions for the RecallrAI SDK.
 """
 
-from typing import Any, Dict, Optional
 from .base import RecallrAIError
 
 
@@ -14,14 +13,8 @@ class NetworkError(RecallrAIError):
     and communication with the RecallrAI API.
     """
 
-    def __init__(
-        self, 
-        message: str = "Network error occurred", 
-        code: str = "network_error",
-        http_status: Optional[int] = None,
-        details: Optional[Dict[str, Any]] = None
-    ):
-        super().__init__(message, code, http_status, details)
+    def __init__(self, message: str, http_status: int):
+        super().__init__(message, http_status)
 
 
 class TimeoutError(NetworkError):
@@ -32,13 +25,8 @@ class TimeoutError(NetworkError):
     takes longer than the configured timeout.
     """
 
-    def __init__(
-        self, 
-        message: str = "Request timed out", 
-        code: str = "timeout",
-        details: Optional[Dict[str, Any]] = None
-    ):
-        super().__init__(message, code, None, details)
+    def __init__(self, message: str, http_status: int):
+        super().__init__(message, http_status)
 
 
 class ConnectionError(NetworkError):
@@ -49,10 +37,5 @@ class ConnectionError(NetworkError):
     the RecallrAI API, such as DNS resolution issues or network unavailability.
     """
 
-    def __init__(
-        self, 
-        message: str = "Failed to connect to the RecallrAI API", 
-        code: str = "connection_error",
-        details: Optional[Dict[str, Any]] = None
-    ):
-        super().__init__(message, code, None, details)
+    def __init__(self, message: str, http_status: int):
+        super().__init__(message, http_status)

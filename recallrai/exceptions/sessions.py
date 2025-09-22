@@ -2,7 +2,6 @@
 Sessions-related exceptions for the RecallrAI SDK.
 """
 
-from typing import Any, Dict, Optional
 from .base import RecallrAIError
 
 class SessionError(RecallrAIError):
@@ -13,14 +12,8 @@ class SessionError(RecallrAIError):
     in the RecallrAI API.
     """
 
-    def __init__(
-        self, 
-        message: str = "Session error occurred", 
-        code: str = "session_error",
-        http_status: Optional[int] = None,
-        details: Optional[Dict[str, Any]] = None
-    ):
-        super().__init__(message, code, http_status, details)
+    def __init__(self, message: str, http_status: int):
+        super().__init__(message, http_status)
 
 class InvalidSessionStateError(SessionError):
     """
@@ -30,14 +23,8 @@ class InvalidSessionStateError(SessionError):
     on a session that is not in the expected state.
     """
 
-    def __init__(
-        self, 
-        message: str = "Invalid session state", 
-        code: str = "invalid_session_state",
-        http_status: int = 400,
-        details: Optional[Dict[str, Any]] = None
-    ):
-        super().__init__(message, code, http_status, details)
+    def __init__(self, message: str, http_status: int):
+        super().__init__(message, http_status)
 
 class SessionNotFoundError(SessionError):
     """
@@ -47,14 +34,5 @@ class SessionNotFoundError(SessionError):
     a session that doesn't exist.
     """
 
-    def __init__(
-        self, 
-        session_id: Optional[str] = None,
-        message: Optional[str] = None,
-        code: str = "session_not_found",
-        http_status: int = 404,
-        details: Optional[Dict[str, Any]] = None
-    ):
-        message = message or f"Session{f' {session_id}' if session_id else ''} not found"
-        super().__init__(message, code, http_status, details)
-        self.session_id = session_id
+    def __init__(self, message: str, http_status: int):
+        super().__init__(message, http_status)

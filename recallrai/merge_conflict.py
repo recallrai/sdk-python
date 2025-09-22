@@ -81,7 +81,10 @@ class MergeConflict:
             RecallrAIError: For other API-related errors
         """
         if self.status in [MergeConflictStatus.RESOLVED, MergeConflictStatus.FAILED]:
-            raise MergeConflictAlreadyResolvedError(conflict_id=self.conflict_id)
+            raise MergeConflictAlreadyResolvedError(
+                message=f"Merge conflict {self.conflict_id} is already resolved",
+                http_status=400
+            )
 
         # Convert answers to the format expected by the API
         answer_data = {
@@ -104,72 +107,36 @@ class MergeConflict:
             # Check if it's a user not found or conflict not found error
             detail = response.json().get('detail', '')
             if f"User {self.user_id} not found" in detail:
-                raise UserNotFoundError(user_id=self.user_id)
+                raise UserNotFoundError(message=detail, http_status=response.status_code)
             else:
-                raise MergeConflictNotFoundError(conflict_id=self.conflict_id)
+                raise MergeConflictNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code == 400:
             detail = response.json().get('detail', '')
             if "already resolved" in detail:
-                raise MergeConflictAlreadyResolvedError(conflict_id=self.conflict_id)
+                raise MergeConflictAlreadyResolvedError(message=detail, http_status=response.status_code)
             elif "Invalid questions provided" in detail:
-                # Extract invalid questions from the error message if possible
-                import re
-                match = re.search(r"The following questions do not match the original questions: (.+)", detail)
-                invalid_questions = None
-                if match:
-                    try:
-                        invalid_questions = eval(match.group(1))  # Parse the list from string
-                    except:
-                        pass
                 raise MergeConflictInvalidQuestionsError(
-                    invalid_questions=invalid_questions,
-                    conflict_id=self.conflict_id,
-                    message=detail
+                    message=detail,
+                    http_status=response.status_code
                 )
             elif "Missing answers for the following questions" in detail:
-                # Extract missing questions from the error message if possible
-                import re
-                match = re.search(r"Missing answers for the following questions: (.+)", detail)
-                missing_questions = None
-                if match:
-                    try:
-                        missing_questions = eval(match.group(1))  # Parse the list from string
-                    except:
-                        pass
                 raise MergeConflictMissingAnswersError(
-                    missing_questions=missing_questions,
-                    conflict_id=self.conflict_id,
-                    message=detail
+                    message=detail,
+                    http_status=response.status_code
                 )
             elif "Invalid answer" in detail and "for question" in detail:
-                # Extract question, answer, and valid options from the error message
-                import re
-                match = re.search(r"Invalid answer '(.+?)' for question '(.+?)'\. Valid options are: (.+)", detail)
-                invalid_answer = None
-                question = None
-                valid_options = None
-                if match:
-                    try:
-                        invalid_answer = match.group(1)
-                        question = match.group(2)
-                        valid_options = eval(match.group(3))  # Parse the list from string
-                    except:
-                        pass
                 raise MergeConflictInvalidAnswerError(
-                    question=question,
-                    invalid_answer=invalid_answer,
-                    valid_options=valid_options,
-                    conflict_id=self.conflict_id,
-                    message=detail
+                    message=detail,
+                    http_status=response.status_code
                 )
             else:
                 raise RecallrAIError(
-                    message=f"Failed to resolve merge conflict: {detail}",
+                    message=detail,
                     http_status=response.status_code
                 )
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to resolve merge conflict: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
 
@@ -201,12 +168,12 @@ class MergeConflict:
             # Check if it's a user not found or conflict not found error
             detail = response.json().get('detail', '')
             if f"User {self.user_id} not found" in detail:
-                raise UserNotFoundError(user_id=self.user_id)
+                raise UserNotFoundError(message=detail, http_status=response.status_code)
             else:
-                raise MergeConflictNotFoundError(conflict_id=self.conflict_id)
+                raise MergeConflictNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code != 200:
             raise RecallrAIError(
-                message=f"Failed to refresh merge conflict: {response.json().get('detail', 'Unknown error')}",
+                message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
 
