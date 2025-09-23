@@ -99,7 +99,8 @@ class Session:
         recall_strategy: RecallStrategy = RecallStrategy.BALANCED, 
         min_top_k: int = 15,
         max_top_k: int = 50, 
-        threshold: float = 0.6, 
+        memories_threshold: float = 0.6,
+        summaries_threshold: float = 0.5,
         last_n_messages: Optional[int] = None, 
         last_n_summaries: Optional[int] = None,
         timezone: Optional[str] = None
@@ -111,7 +112,8 @@ class Session:
             recall_strategy: The type of recall strategy to use
             min_top_k: Minimum number of memories to return
             max_top_k: Maximum number of memories to return
-            threshold: Similarity threshold for memories
+            memories_threshold: Similarity threshold for memories
+            summaries_threshold: Similarity threshold for summaries
             last_n_messages: Number of last messages to include in context
             last_n_summaries: Number of last summaries to include in context
             timezone: Timezone for formatting timestamps (e.g., 'America/New_York'). None for UTC
@@ -132,7 +134,8 @@ class Session:
             "recall_strategy": recall_strategy.value,
             "min_top_k": min_top_k,
             "max_top_k": max_top_k,
-            "threshold": threshold,
+            "memories_threshold": memories_threshold,
+            "summaries_threshold": summaries_threshold,
         }
         if last_n_messages is not None:
             params["last_n_messages"] = last_n_messages

@@ -266,7 +266,8 @@ try:
         recall_strategy=RecallStrategy.BALANCED,
         min_top_k=10,
         max_top_k=100,
-        threshold=0.7,
+        memories_threshold=0.6,
+        summaries_threshold=0.5,
         last_n_messages=20,
         last_n_summaries=5,
         timezone="America/Los_Angeles"  # Optional: timezone for timestamp formatting, None for UTC
@@ -281,7 +282,8 @@ try:
     # Parameters:
     # - min_top_k: Minimum number of memories to return (default: 15, range: 5-50)
     # - max_top_k: Maximum number of memories to return (default: 50, range: 10-100)
-    # - threshold: Similarity threshold for memories (default: 0.6, range: 0.2-0.8)
+    # - memories_threshold: Similarity threshold for memories (default: 0.6, range: 0.2-0.8)
+    # - summaries_threshold: Similarity threshold for summaries (default: 0.5, range: 0.2-0.8)
     # - last_n_messages: Number of last messages to include in context (optional, range: 1-100)
     # - last_n_summaries: Number of last summaries to include in context (optional, range: 1-20)
     # - timezone: Timezone for formatting timestamps (optional, e.g., 'America/New_York', None for UTC)
@@ -583,7 +585,7 @@ def chat_with_memory(user_id, session_id=None):
         
         # Get context from RecallrAI after adding the user message
         # You can specify a recall strategy for different performance/quality trade-offs
-        # Additional parameters like min_top_k, max_top_k, threshold, last_n_messages, last_n_summaries are available
+        # Additional parameters like min_top_k, max_top_k, memories_threshold, summaries_threshold, last_n_messages, last_n_summaries are available
         context = session.get_context()  # Uses default BALANCED strategy
         
         # Create a system prompt that includes the context
