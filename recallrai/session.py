@@ -94,12 +94,25 @@ class Session:
                 http_status=response.status_code
             )
 
-    def get_context(self, recall_strategy: RecallStrategy = RecallStrategy.BALANCED) -> Context:
+    def get_context(
+        self, 
+        recall_strategy: RecallStrategy = RecallStrategy.BALANCED, 
+        min_top_k: int = 15,
+        max_top_k: int = 50, 
+        threshold: float = 0.6, 
+        last_n_messages: Optional[int] = None, 
+        last_n_summaries: Optional[int] = None
+    ) -> Context:
         """
         Get the current context for this session.
 
         Args:
             recall_strategy: The type of recall strategy to use
+            min_top_k: Minimum number of memories to return
+            max_top_k: Maximum number of memories to return
+            threshold: Similarity threshold for memories
+            last_n_messages: Number of last messages to include in context
+            last_n_summaries: Number of last summaries to include in context
 
         Returns:
             Context information with the memory text and whether memory was used
@@ -113,9 +126,20 @@ class Session:
             TimeoutError: If the request times out
             RecallrAIError: For other API-related errors
         """
+        params = {
+            "recall_strategy": recall_strategy.value,
+            "min_top_k": min_top_k,
+            "max_top_k": max_top_k,
+            "threshold": threshold,
+        }
+        if last_n_messages is not None:
+            params["last_n_messages"] = last_n_messages
+        if last_n_summaries is not None:
+            params["last_n_summaries"] = last_n_summaries
+
         response = self._http.get(
             f"/api/v1/users/{self._user_id}/sessions/{self.session_id}/context",
-            params={"recall_strategy": recall_strategy.value},
+            params=params,
         )
 
         if response.status_code == 404:

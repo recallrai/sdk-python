@@ -251,7 +251,7 @@ from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
 from recallrai.models import RecallStrategy
 
 try:
-    # Get context with default balanced strategy
+    # Get context with default parameters
     context = session.get_context()
     print("Context:", context.context)
     
@@ -259,10 +259,28 @@ try:
     context = session.get_context(recall_strategy=RecallStrategy.LOW_LATENCY)
     print("Context:", context.context)
     
+    # Get context with custom memory retrieval parameters
+    context = session.get_context(
+        recall_strategy=RecallStrategy.BALANCED,
+        min_top_k=10,
+        max_top_k=100,
+        threshold=0.7,
+        last_n_messages=20,
+        last_n_summaries=5
+    )
+    print("Context:", context.context)
+    
     # Available recall strategies:
     # - RecallStrategy.LOW_LATENCY: Fast retrieval with basic relevance
     # - RecallStrategy.BALANCED: Good balance of speed and quality (default)
     # - RecallStrategy.DEEP: More thorough but slower memory search
+    
+    # Parameters:
+    # - min_top_k: Minimum number of memories to return (default: 15, range: 5-50)
+    # - max_top_k: Maximum number of memories to return (default: 50, range: 10-100)
+    # - threshold: Similarity threshold for memories (default: 0.6, range: 0.2-0.8)
+    # - last_n_messages: Number of last messages to include in context (optional, range: 1-100)
+    # - last_n_summaries: Number of last summaries to include in context (optional, range: 1-20)
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
@@ -561,6 +579,7 @@ def chat_with_memory(user_id, session_id=None):
         
         # Get context from RecallrAI after adding the user message
         # You can specify a recall strategy for different performance/quality trade-offs
+        # Additional parameters like min_top_k, max_top_k, threshold, last_n_messages, last_n_summaries are available
         context = session.get_context()  # Uses default BALANCED strategy
         
         # Create a system prompt that includes the context
