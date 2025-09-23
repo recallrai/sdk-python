@@ -101,7 +101,8 @@ class Session:
         max_top_k: int = 50, 
         threshold: float = 0.6, 
         last_n_messages: Optional[int] = None, 
-        last_n_summaries: Optional[int] = None
+        last_n_summaries: Optional[int] = None,
+        timezone: Optional[str] = None
     ) -> Context:
         """
         Get the current context for this session.
@@ -113,6 +114,7 @@ class Session:
             threshold: Similarity threshold for memories
             last_n_messages: Number of last messages to include in context
             last_n_summaries: Number of last summaries to include in context
+            timezone: Timezone for formatting timestamps (e.g., 'America/New_York'). None for UTC
 
         Returns:
             Context information with the memory text and whether memory was used
@@ -136,6 +138,8 @@ class Session:
             params["last_n_messages"] = last_n_messages
         if last_n_summaries is not None:
             params["last_n_summaries"] = last_n_summaries
+        if timezone is not None:
+            params["timezone"] = timezone
 
         response = self._http.get(
             f"/api/v1/users/{self._user_id}/sessions/{self.session_id}/context",

@@ -2,6 +2,8 @@
 
 Official Python SDK for RecallrAI – a revolutionary contextual memory system that enables AI assistants to form meaningful connections between conversations, just like human memory.
 
+**Note:** All datetime objects returned by the SDK are in UTC timezone.
+
 ## Installation
 
 Install the SDK via Poetry or pip:
@@ -266,7 +268,8 @@ try:
         max_top_k=100,
         threshold=0.7,
         last_n_messages=20,
-        last_n_summaries=5
+        last_n_summaries=5,
+        timezone="America/Los_Angeles"  # Optional: timezone for timestamp formatting, None for UTC
     )
     print("Context:", context.context)
     
@@ -281,6 +284,7 @@ try:
     # - threshold: Similarity threshold for memories (default: 0.6, range: 0.2-0.8)
     # - last_n_messages: Number of last messages to include in context (optional, range: 1-100)
     # - last_n_summaries: Number of last summaries to include in context (optional, range: 1-20)
+    # - timezone: Timezone for formatting timestamps (optional, e.g., 'America/New_York', None for UTC)
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
