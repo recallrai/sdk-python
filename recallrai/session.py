@@ -40,9 +40,9 @@ class Session:
         Initialize a session.
 
         Args:
-            http_client: HTTP client for API communication
-            user_id: ID of the user who owns this session
-            session_data: Initial session data from the API
+            http_client: HTTP client for API communication.
+            user_id: ID of the user who owns this session.
+            session_data: Initial session data from the API.
         """
         self._http = http_client
         self._user_id = user_id
@@ -57,18 +57,18 @@ class Session:
         Internal helper to add a message to the session.
 
         Args:
-            role: Role of the message sender
-            content: Content of the message
+            role: Role of the message sender.
+            content: Content of the message.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            SessionNotFoundError: If the session is not found
-            InvalidSessionStateError: If the session is already processed or processing
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            SessionNotFoundError: If the session is not found.
+            InvalidSessionStateError: If the session is already processed or processing.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         response = self._http.post(
             f"/api/v1/users/{self._user_id}/sessions/{self.session_id}/add-message",
@@ -109,26 +109,26 @@ class Session:
         Get the current context for this session.
 
         Args:
-            recall_strategy: The type of recall strategy to use
-            min_top_k: Minimum number of memories to return
-            max_top_k: Maximum number of memories to return
-            memories_threshold: Similarity threshold for memories
-            summaries_threshold: Similarity threshold for summaries
-            last_n_messages: Number of last messages to include in context
-            last_n_summaries: Number of last summaries to include in context
-            timezone: Timezone for formatting timestamps (e.g., 'America/New_York'). None for UTC
+            recall_strategy: The type of recall strategy to use.
+            min_top_k: Minimum number of memories to return.
+            max_top_k: Maximum number of memories to return.
+            memories_threshold: Similarity threshold for memories.
+            summaries_threshold: Similarity threshold for summaries.
+            last_n_messages: Number of last messages to include in context.
+            last_n_summaries: Number of last summaries to include in context.
+            timezone: Timezone for formatting timestamps (e.g., 'America/New_York'). None for UTC.
 
         Returns:
-            Context information with the memory text and whether memory was used
+            Context information with the memory text and whether memory was used.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            SessionNotFoundError: If the session is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            SessionNotFoundError: If the session is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         params = {
             "recall_strategy": recall_strategy.value,
@@ -172,16 +172,16 @@ class Session:
         Update the session's metadata.
 
         Args:
-            new_metadata: New metadata to associate with the session
+            new_metadata: New metadata to associate with the session.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            SessionNotFoundError: If the session is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            SessionNotFoundError: If the session is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         response = self._http.put(
             f"/api/v1/users/{self._user_id}/sessions/{self.session_id}",
@@ -212,13 +212,13 @@ class Session:
         that may have occurred on the server.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            SessionNotFoundError: If the session is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            SessionNotFoundError: If the session is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         response = self._http.get(
             f"/api/v1/users/{self._user_id}/sessions/{self.session_id}"
@@ -250,14 +250,14 @@ class Session:
         the user's memory.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            SessionNotFoundError: If the session is not found
-            InvalidSessionStateError: If the session is already processed or being processed
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            SessionNotFoundError: If the session is not found.
+            InvalidSessionStateError: If the session is already processed or being processed.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         response = self._http.post(
             f"/api/v1/users/{self._user_id}/sessions/{self.session_id}/process"
@@ -291,16 +291,16 @@ class Session:
         Get all messages in the session.
 
         Returns:
-            Paginated list of messages in the session
+            Paginated list of messages in the session.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            SessionNotFoundError: If the session is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            SessionNotFoundError: If the session is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         response = self._http.get(
             f"/api/v1/users/{self._user_id}/sessions/{self.session_id}/messages",

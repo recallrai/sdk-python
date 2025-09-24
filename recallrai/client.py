@@ -36,10 +36,10 @@ class RecallrAI:
         Initialize the RecallrAI client.
 
         Args:
-            api_key: Your RecallrAI API key
-            project_id: Your project ID
-            base_url: The base URL for the RecallrAI API
-            timeout: Request timeout in seconds
+            api_key: Your RecallrAI API key.
+            project_id: Your project ID.
+            base_url: The base URL for the RecallrAI API.
+            timeout: Request timeout in seconds.
         """
         if not api_key.startswith("rai_"):
             raise ValueError("API key must start with 'rai_'")
@@ -61,19 +61,19 @@ class RecallrAI:
         Create a new user.
 
         Args:
-            user_id: Unique identifier for the user
-            metadata: Optional metadata to associate with the user
+            user_id: Unique identifier for the user.
+            metadata: Optional metadata to associate with the user.
 
         Returns:
-            The created user object
+            The created user object.
 
         Raises:
-            UserAlreadyExistsError: If a user with the same ID already exists
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserAlreadyExistsError: If a user with the same ID already exists.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         response = self._http.post("/api/v1/users", data={"user_id": user_id, "metadata": metadata or {}})
         if response.status_code == 409:
@@ -90,18 +90,18 @@ class RecallrAI:
         Get a user by ID.
 
         Args:
-            user_id: Unique identifier of the user
+            user_id: Unique identifier of the user.
 
         Returns:
-            A User object representing the user
+            A User object representing the user.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         response = self._http.get(f"/api/v1/users/{user_id}")
         if response.status_code == 404:
@@ -123,18 +123,18 @@ class RecallrAI:
         List users with pagination.
 
         Args:
-            offset: Number of records to skip
-            limit: Maximum number of records to return
+            offset: Number of records to skip.
+            limit: Maximum number of records to return.
 
         Returns:
-            List of users with pagination info
+            List of users with pagination info.
         
         Raises:
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         params: Dict[str, Any] = {"offset": offset, "limit": limit}
         if metadata_filter is not None:

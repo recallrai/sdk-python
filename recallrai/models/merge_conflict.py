@@ -27,8 +27,8 @@ class MergeConflictMemory(BaseModel):
     """
     Represents a memory involved in a merge conflict.
     """
-    content: str = Field(..., description="Content of the conflicting memory")
-    reason: str = Field(..., description="Reason why this memory conflicts")
+    content: str = Field(..., description="Content of the conflicting memory.")
+    reason: str = Field(..., description="Reason why this memory conflicts.")
 
     class Config:
         """Pydantic configuration."""
@@ -39,8 +39,8 @@ class MergeConflictQuestion(BaseModel):
     """
     Represents a clarifying question for merge conflict resolution.
     """
-    question: str = Field(..., description="The clarifying question")
-    options: List[str] = Field(..., description="Available answer options")
+    question: str = Field(..., description="The clarifying question.")
+    options: List[str] = Field(..., description="Available answer options.")
 
     class Config:
         """Pydantic configuration."""
@@ -51,9 +51,9 @@ class MergeConflictAnswer(BaseModel):
     """
     Represents an answer to a clarifying question.
     """
-    question: str = Field(..., description="The question being answered")
-    answer: str = Field(..., description="The selected answer")
-    message: Optional[str] = Field(None, description="Optional additional message")
+    question: str = Field(..., description="The question being answered.")
+    answer: str = Field(..., description="The selected answer.")
+    message: Optional[str] = Field(None, description="Optional additional message.")
 
     class Config:
         """Pydantic configuration."""
@@ -64,16 +64,16 @@ class MergeConflictModel(BaseModel):
     """
     Represents a merge conflict in the RecallrAI system.
     """
-    id: str = Field(..., description="Unique identifier for the merge conflict")
-    custom_user_id: str = Field(..., description="User ID who owns this conflict")
-    project_user_session_id: str = Field(..., description="Session ID where the conflict occurred")
-    new_memory_content: str = Field(..., description="New memory content that caused the conflict")
-    conflicting_memories: List[MergeConflictMemory] = Field(..., description="Existing memories that conflict")
-    clarifying_questions: List[MergeConflictQuestion] = Field(..., description="Questions to resolve the conflict")
-    status: MergeConflictStatus = Field(..., description="Current status of the conflict")
-    resolution_data: Optional[Dict[str, Any]] = Field(None, description="Resolution data if resolved")
-    created_at: datetime = Field(..., description="When the conflict was created")
-    resolved_at: Optional[datetime] = Field(None, description="When the conflict was resolved")
+    id: str = Field(..., description="Unique identifier for the merge conflict.")
+    custom_user_id: str = Field(..., description="User ID who owns this conflict.")
+    project_user_session_id: str = Field(..., description="Session ID where the conflict occurred.")
+    new_memory_content: str = Field(..., description="New memory content that caused the conflict.")
+    conflicting_memories: List[MergeConflictMemory] = Field(..., description="Existing memories that conflict.")
+    clarifying_questions: List[MergeConflictQuestion] = Field(..., description="Questions to resolve the conflict.")
+    status: MergeConflictStatus = Field(..., description="Current status of the conflict.")
+    resolution_data: Optional[Dict[str, Any]] = Field(None, description="Resolution data if resolved.")
+    created_at: datetime = Field(..., description="When the conflict was created.")
+    resolved_at: Optional[datetime] = Field(None, description="When the conflict was resolved.")
 
     class Config:
         """Pydantic configuration."""
@@ -88,10 +88,10 @@ class MergeConflictModel(BaseModel):
         Create a MergeConflictModel instance from an API response.
 
         Args:
-            data: API response data
+            data: API response data.
 
         Returns:
-            A MergeConflictModel instance
+            A MergeConflictModel instance.
         """
         conflict_data = data.get("conflict", data)
         
@@ -117,9 +117,9 @@ class MergeConflictList(BaseModel):
     """
     Represents a paginated list of merge conflicts.
     """
-    conflicts: List["MergeConflict"] = Field(..., description="List of merge conflicts")
-    total: int = Field(..., description="Total number of conflicts")
-    has_more: bool = Field(..., description="Whether there are more conflicts to fetch")
+    conflicts: List["MergeConflict"] = Field(..., description="List of merge conflicts.")
+    total: int = Field(..., description="Total number of conflicts.")
+    has_more: bool = Field(..., description="Whether there are more conflicts to fetch.")
 
     class Config:
         """Pydantic configuration."""
@@ -131,12 +131,12 @@ class MergeConflictList(BaseModel):
         Create a MergeConflictList instance from an API response.
 
         Args:
-            data: API response data
-            http_client: HTTP client for making API requests
-            user_id: User ID who owns these conflicts
+            data: API response data.
+            http_client: HTTP client for making API requests.
+            user_id: User ID who owns these conflicts.
 
         Returns:
-            A MergeConflictList instance
+            A MergeConflictList instance.
         """
         from ..merge_conflict import MergeConflict
         

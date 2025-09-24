@@ -13,10 +13,10 @@ if TYPE_CHECKING:
 class UserModel(BaseModel):
     """Represents a user in the RecallrAI system."""
     
-    user_id: str = Field(..., description="Unique identifier for the user")
-    metadata: Dict[str, Any] = Field(..., description="Custom metadata for the user")
-    created_at: datetime = Field(..., description="When the user was created")
-    last_active_at: datetime = Field(..., description="When the user was last active")
+    user_id: str = Field(..., description="Unique identifier for the user.")
+    metadata: Dict[str, Any] = Field(..., description="Custom metadata for the user.")
+    created_at: datetime = Field(..., description="When the user was created.")
+    last_active_at: datetime = Field(..., description="When the user was last active.")
 
     class Config:
         """Pydantic configuration."""
@@ -31,10 +31,10 @@ class UserModel(BaseModel):
         Create a UserModel instance from an API response.
 
         Args:
-            data: API response data
+            data: API response data.
 
         Returns:
-            A UserModel instance
+            A UserModel instance.
         """
         user_data = data["user"]
 
@@ -49,9 +49,9 @@ class UserModel(BaseModel):
 class UserList(BaseModel):
     """Represents a paginated list of users."""
 
-    users: List["User"] = Field(..., description="List of users")
-    total: int = Field(..., description="Total number of users")
-    has_more: bool = Field(..., description="Whether there are more users to fetch")
+    users: List["User"] = Field(..., description="List of users.")
+    total: int = Field(..., description="Total number of users.")
+    has_more: bool = Field(..., description="Whether there are more users to fetch.")
 
     @classmethod
     def from_api_response(cls, data: Dict[str, Any], http_client: HTTPClient) -> "UserList":
@@ -59,10 +59,10 @@ class UserList(BaseModel):
         Create a UserList instance from an API response.
 
         Args:
-            data: API response data
+            data: API response data.
 
         Returns:
-            A UserList instance
+            A UserList instance.
         """
         from ..user import User
         return cls(
@@ -108,10 +108,10 @@ class UserMemoriesList(BaseModel):
 class UserMessage(BaseModel):
     """Represents a single message from a user's conversation history."""
 
-    role: str = Field(..., description="Role of the message sender (user or assistant)")
-    content: str = Field(..., description="Content of the message")
-    timestamp: datetime = Field(..., description="When the message was sent")
-    session_id: str = Field(..., description="ID of the session this message belongs to")
+    role: str = Field(..., description="Role of the message sender (user or assistant).")
+    content: str = Field(..., description="Content of the message.")
+    timestamp: datetime = Field(..., description="When the message was sent.")
+    session_id: str = Field(..., description="ID of the session this message belongs to.")
 
     class Config:
         frozen = True
@@ -123,7 +123,7 @@ class UserMessage(BaseModel):
 class UserMessagesList(BaseModel):
     """Represents a list of user messages."""
 
-    messages: List[UserMessage] = Field(..., description="List of user messages")
+    messages: List[UserMessage] = Field(..., description="List of user messages.")
 
     @classmethod
     def from_api_response(cls, data: Dict[str, Any]) -> "UserMessagesList":
@@ -131,10 +131,10 @@ class UserMessagesList(BaseModel):
         Create a UserMessagesList instance from an API response.
 
         Args:
-            data: API response data
+            data: API response data.
 
         Returns:
-            A UserMessagesList instance
+            A UserMessagesList instance.
         """
         return cls(
             messages=[UserMessage(**message) for message in data["messages"]]

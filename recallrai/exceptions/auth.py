@@ -15,7 +15,7 @@ class AuthenticationError(RecallrAIError):
 
     def __init__(
         self, 
-        message: str = "Invalid API key or authentication failed", 
+        message: str = "Invalid API key or authentication failed.", 
         http_status: int = 401,
     ):
         super().__init__(message, http_status)

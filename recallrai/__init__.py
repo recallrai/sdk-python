@@ -1,5 +1,5 @@
 """
-RecallrAI Python SDK
+RecallrAI Python SDK.
 
 This package provides a Python interface to interact with the RecallrAI API.
 """

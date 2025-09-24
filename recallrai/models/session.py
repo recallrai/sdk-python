@@ -22,9 +22,9 @@ class Message(BaseModel):
     """
     Represents a message in a conversation session.
     """
-    role: MessageRole = Field(..., description="Role of the message sender (user or assistant)")
-    content: str = Field(..., description="Content of the message")
-    timestamp: datetime = Field(..., description="When the message was sent")
+    role: MessageRole = Field(..., description="Role of the message sender (user or assistant).")
+    content: str = Field(..., description="Content of the message.")
+    timestamp: datetime = Field(..., description="When the message was sent.")
 
     class Config:
         """Pydantic configuration."""
@@ -39,9 +39,9 @@ class SessionMessagesList(BaseModel):
     Represents a paginated list of messages in a session.
     """
 
-    messages: List[Message] = Field(..., description="List of messages in the page")
-    total: int = Field(..., description="Total number of messages in the session")
-    has_more: bool = Field(..., description="Whether there are more messages to fetch")
+    messages: List[Message] = Field(..., description="List of messages in the page.")
+    total: int = Field(..., description="Total number of messages in the session.")
+    has_more: bool = Field(..., description="Whether there are more messages to fetch.")
 
     class Config:
         frozen = True
@@ -68,10 +68,10 @@ class SessionModel(BaseModel):
     """
     Represents a conversation session.
     """
-    session_id: str = Field(..., description="Unique identifier for the session")
-    status: SessionStatus = Field(..., description="Current status of the session")
-    created_at: datetime = Field(..., description="When the session was created")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Optional metadata for the session")
+    session_id: str = Field(..., description="Unique identifier for the session.")
+    status: SessionStatus = Field(..., description="Current status of the session.")
+    created_at: datetime = Field(..., description="When the session was created.")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Optional metadata for the session.")
 
     class Config:
         """Pydantic configuration."""
@@ -86,10 +86,10 @@ class SessionModel(BaseModel):
         Create a SessionModel instance from an API response.
 
         Args:
-            data: API response data
+            data: API response data.
 
         Returns:
-            A SessionModel instance
+            A SessionModel instance.
         """
         return cls(
             session_id=data["session_id"],
@@ -103,9 +103,9 @@ class SessionList(BaseModel):
     """
     Represents a paginated list of sessions.
     """
-    sessions: List["Session"] = Field(..., description="List of sessions")
-    total: int = Field(..., description="Total number of sessions")
-    has_more: bool = Field(..., description="Whether there are more sessions to fetch")
+    sessions: List["Session"] = Field(..., description="List of sessions.")
+    total: int = Field(..., description="Total number of sessions.")
+    has_more: bool = Field(..., description="Whether there are more sessions to fetch.")
 
     class Config:
         """Pydantic configuration."""
@@ -117,10 +117,10 @@ class SessionList(BaseModel):
         Create a SessionList instance from an API response.
 
         Args:
-            data: API response data
+            data: API response data.
 
         Returns:
-            A SessionList instance
+            A SessionList instance.
         """
         from ..session import Session
         return cls(
@@ -143,7 +143,7 @@ class Context(BaseModel):
     """
     Represents the context for a session.
     """
-    context: str = Field(..., description="The context for the session")
+    context: str = Field(..., description="The context for the session.")
 
     class Config:
         """Pydantic configuration."""
@@ -155,10 +155,10 @@ class Context(BaseModel):
         Create a Context instance from an API response.
 
         Args:
-            data: API response data
+            data: API response data.
 
         Returns:
-            A Context instance
+            A Context instance.
         """
         return cls(
             context=data["context"],

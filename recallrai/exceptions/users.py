@@ -44,4 +44,3 @@ class InvalidCategoriesError(UserError):
     """
     def __init__(self, message: str, http_status: int):
         super().__init__(message, http_status)
-    

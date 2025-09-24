@@ -1,6 +1,7 @@
 """
 HTTP client for making requests to the RecallrAI API.
 """
+
 from httpx import Response, Client, TimeoutException, NetworkError, ConnectError
 from typing import Any, Dict, Optional
 from ..exceptions import (
@@ -25,10 +26,10 @@ class HTTPClient:
         Initialize the HTTP client.
 
         Args:
-            api_key: Your RecallrAI API key
-            project_id: Your project ID
-            base_url: The base URL for the RecallrAI API
-            timeout: Request timeout in seconds
+            api_key: Your RecallrAI API key.
+            project_id: Your project ID.
+            base_url: The base URL for the RecallrAI API.
+            timeout: Request timeout in seconds.
         """
 
         self.api_key = api_key
@@ -57,13 +58,13 @@ class HTTPClient:
         Make a request to the RecallrAI API.
 
         Args:
-            method: HTTP method (GET, POST, PUT, DELETE)
-            path: API endpoint path
-            params: Query parameters
-            data: Request body data
+            method: HTTP method (GET, POST, PUT, DELETE).
+            path: API endpoint path.
+            params: Query parameters.
+            data: Request body data.
 
         Returns:
-            The parsed JSON response
+            The parsed JSON response.
         """
         url = f"{self.base_url}{path}"
         

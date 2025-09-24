@@ -41,9 +41,9 @@ class MergeConflict:
         Initialize a merge conflict.
 
         Args:
-            http_client: HTTP client for API communication
-            user_id: User ID who owns this conflict
-            conflict_data: Merge conflict data model
+            http_client: HTTP client for API communication.
+            user_id: User ID who owns this conflict.
+            conflict_data: Merge conflict data model.
         """
         self._http = http_client
         self.user_id = user_id
@@ -64,21 +64,21 @@ class MergeConflict:
         Resolve this merge conflict by providing answers to clarifying questions.
 
         Args:
-            answers: List of answers to the clarifying questions
+            answers: List of answers to the clarifying questions.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            MergeConflictNotFoundError: If the merge conflict is not found
-            MergeConflictAlreadyResolvedError: If the conflict is already resolved
-            MergeConflictInvalidQuestionsError: If the provided questions don't match the original questions
-            MergeConflictMissingAnswersError: If not all required questions have been answered
-            MergeConflictInvalidAnswerError: If an answer is not a valid option for its question
-            ValidationError: If the answers are invalid
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            MergeConflictNotFoundError: If the merge conflict is not found.
+            MergeConflictAlreadyResolvedError: If the conflict is already resolved.
+            MergeConflictInvalidQuestionsError: If the provided questions don't match the original questions.
+            MergeConflictMissingAnswersError: If not all required questions have been answered.
+            MergeConflictInvalidAnswerError: If an answer is not a valid option for its question.
+            ValidationError: If the answers are invalid.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         if self.status in [MergeConflictStatus.RESOLVED, MergeConflictStatus.FAILED]:
             raise MergeConflictAlreadyResolvedError(
@@ -152,13 +152,13 @@ class MergeConflict:
         Refresh this merge conflict's data from the API.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            MergeConflictNotFoundError: If the merge conflict is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            MergeConflictNotFoundError: If the merge conflict is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         response = self._http.get(
             f"/api/v1/users/{self.user_id}/merge-conflicts/{self.conflict_id}"

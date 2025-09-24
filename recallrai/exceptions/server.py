@@ -43,10 +43,10 @@ class RateLimitError(ServerError):
 #     This exception is raised when the API is down for maintenance
 #     or experiencing issues.
 #     """
-
+#
 #     def __init__(
 #         self, 
-#         message: str = "Service temporarily unavailable", 
+#         message: str = "Service temporarily unavailable.", 
 #         code: str = "service_unavailable",
 #         http_status: int = 503,
 #         retry_after: Optional[int] = None,

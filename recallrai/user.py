@@ -46,8 +46,8 @@ class User:
         Initialize a user.
 
         Args:
-            http_client: HTTP client for API communication
-            user_data: User data model with user information
+            http_client: HTTP client for API communication.
+            user_data: User data model with user information.
         """
         self._http = http_client
         self._user_data = user_data
@@ -61,17 +61,17 @@ class User:
         Update this user's metadata or ID.
 
         Args:
-            new_metadata: New metadata to associate with the user
-            new_user_id: New ID for the user
+            new_metadata: New metadata to associate with the user.
+            new_user_id: New ID for the user.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            UserAlreadyExistsError: If a user with the new_user_id already exists
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            UserAlreadyExistsError: If a user with the new_user_id already exists.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         data = {}
         if new_metadata is not None:
@@ -106,12 +106,12 @@ class User:
         Refresh this user's data from the server.
         
         Raises:
-            UserNotFoundError: If the user is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         response = self._http.get(f"/api/v1/users/{self.user_id}")
         
@@ -138,12 +138,12 @@ class User:
         Delete this user.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         response = self._http.delete(f"/api/v1/users/{self.user_id}")
         
@@ -165,19 +165,19 @@ class User:
         Create a new session for this user.
 
         Args:
-            auto_process_after_seconds: Seconds to wait before auto-processing (min 600)
-            metadata: Optional metadata for the session
+            auto_process_after_seconds: Seconds of inactivity allowed before automaticly processing the session (min 600).
+            metadata: Optional metadata for the session.
 
         Returns:
-            A Session object to interact with the created session
+            A Session object to interact with the created session.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         payload: Dict[str, Any] = {
             "auto_process_after_seconds": auto_process_after_seconds,
@@ -205,19 +205,19 @@ class User:
         Get an existing session for this user.
 
         Args:
-            session_id: ID of the session to retrieve
+            session_id: ID of the session to retrieve.
 
         Returns:
-            A Session object to interact with the session
+            A Session object to interact with the session.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            SessionNotFoundError: If the session is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            SessionNotFoundError: If the session is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         # First, verify the session exists by fetching its details
         response = self._http.get(f"/api/v1/users/{self.user_id}/sessions/{session_id}")
@@ -249,21 +249,21 @@ class User:
         List sessions for this user with pagination.
 
         Args:
-            offset: Number of records to skip
-            limit: Maximum number of records to return
-            metadata_filter: Optional metadata filter for sessions
-            user_metadata_filter: Optional metadata filter for the user
+            offset: Number of records to skip.
+            limit: Maximum number of records to return.
+            metadata_filter: Optional metadata filter for sessions.
+            user_metadata_filter: Optional metadata filter for the user.
 
         Returns:
-            List of sessions with pagination info
+            List of sessions with pagination info.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         params: Dict[str, Any] = {"offset": offset, "limit": limit}
         if metadata_filter is not None:
@@ -297,20 +297,20 @@ class User:
         List memories for this user with optional category filters.
 
         Args:
-            offset: Number of records to skip
-            limit: Maximum number of records to return
-            categories: Optional list of category names to filter by
+            offset: Number of records to skip.
+            limit: Maximum number of records to return.
+            categories: Optional list of category names to filter by.
 
         Returns:
-            UserMemoriesList: Paginated list of memory items
+            UserMemoriesList: Paginated list of memory items.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         params: Dict[str, Any] = {"offset": offset, "limit": limit}
         if categories is not None:
@@ -351,22 +351,22 @@ class User:
         List merge conflicts for this user.
 
         Args:
-            offset: Number of records to skip
-            limit: Maximum number of records to return
-            status: Optional filter by conflict status
-            sort_by: Field to sort by (created_at, resolved_at)
-            sort_order: Sort order (asc, desc)
+            offset: Number of records to skip.
+            limit: Maximum number of records to return.
+            status: Optional filter by conflict status.
+            sort_by: Field to sort by (created_at, resolved_at).
+            sort_order: Sort order (asc, desc).
 
         Returns:
-            MergeConflictList: Paginated list of merge conflicts
+            MergeConflictList: Paginated list of merge conflicts.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         params: Dict[str, Any] = {
             "offset": offset,
@@ -398,19 +398,19 @@ class User:
         Get a specific merge conflict by ID.
 
         Args:
-            conflict_id: Unique identifier of the merge conflict
+            conflict_id: Unique identifier of the merge conflict.
 
         Returns:
-            MergeConflict: The merge conflict object
+            MergeConflict: The merge conflict object.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            MergeConflictNotFoundError: If the merge conflict is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
+            UserNotFoundError: If the user is not found.
+            MergeConflictNotFoundError: If the merge conflict is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
         """
         response = self._http.get(
             f"/api/v1/users/{self.user_id}/merge-conflicts/{conflict_id}"
@@ -440,19 +440,19 @@ class User:
         the recent conversation history for context.
 
         Args:
-            n: Number of recent messages to retrieve (1-100, default: 10)
+            n: Number of recent messages to retrieve (1-100, default: 10).
 
         Returns:
-            UserMessagesList: List of the most recent messages
+            UserMessagesList: List of the most recent messages.
 
         Raises:
-            UserNotFoundError: If the user is not found
-            AuthenticationError: If the API key or project ID is invalid
-            InternalServerError: If the server encounters an error
-            NetworkError: If there are network issues
-            TimeoutError: If the request times out
-            RecallrAIError: For other API-related errors
-            ValueError: If n is not between 1 and 100
+            UserNotFoundError: If the user is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
+            ValueError: If n is not between 1 and 100.
         """
         if not (1 <= n <= 100):
             raise ValueError("n must be between 1 and 100")

@@ -14,8 +14,8 @@ class RecallrAIError(Exception):
         Initialize a RecallrAI error.
 
         Args:
-            message: A human-readable error message
-            http_status: The HTTP status code that triggered this error
+            message: A human-readable error message.
+            http_status: The HTTP status code that triggered this error.
         """
         self.message = message
         self.http_status = http_status
