@@ -11,7 +11,8 @@
         "poetry.lock": true,
         "**/~*": true,
         "**/.pytest_cache": true,
-        "**/.venv": true,
+        ".venv": true,
+        "dist": true,
     },
     "material-icon-theme.folders.associations": {
         "sample_data": "Database"
