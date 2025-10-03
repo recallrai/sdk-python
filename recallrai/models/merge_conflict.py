@@ -124,6 +124,7 @@ class MergeConflictList(BaseModel):
     class Config:
         """Pydantic configuration."""
         frozen = True
+        arbitrary_types_allowed = True
 
     @classmethod
     def from_api_response(cls, data: Dict[str, Any], http_client: HTTPClient, user_id: str) -> "MergeConflictList":

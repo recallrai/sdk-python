@@ -36,7 +36,10 @@ class UserModel(BaseModel):
         Returns:
             A UserModel instance.
         """
-        user_data = data["user"]
+        if "user" in data:
+            user_data = data["user"]
+        else:
+            user_data = data
 
         return cls(
             user_id=user_data["user_id"],
@@ -52,6 +55,9 @@ class UserList(BaseModel):
     users: List["User"] = Field(..., description="List of users.")
     total: int = Field(..., description="Total number of users.")
     has_more: bool = Field(..., description="Whether there are more users to fetch.")
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @classmethod
     def from_api_response(cls, data: Dict[str, Any], http_client: HTTPClient) -> "UserList":

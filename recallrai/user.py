@@ -75,7 +75,7 @@ class User:
         """
         data = {}
         if new_metadata is not None:
-            data["metadata"] = new_metadata
+            data["new_metadata"] = new_metadata
         if new_user_id is not None:
             data["new_user_id"] = new_user_id
             

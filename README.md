@@ -62,12 +62,13 @@ except UserNotFoundError as e:
 user_list = client.list_users(offset=0, limit=10, metadata_filter={"role": "admin"})
 print(f"Total users: {user_list.total}")
 print(f"Has more users: {user_list.has_more}")
+print("---")
 
-for user in user_list.users:
-    print(f"User ID: {user.user_id}")
-    print(f"Metadata: {user.metadata}")
-    print(f"Created at: {user.created_at}")
-    print(f"Last active: {user.last_active_at}")
+for u in user_list.users:
+    print(f"User ID: {u.user_id}")
+    print(f"Metadata: {u.metadata}")
+    print(f"Created at: {u.created_at}")
+    print(f"Last active: {u.last_active_at}")
     print("---")
 ```
 
@@ -216,8 +217,8 @@ try:
     )
     print(f"Total sessions: {session_list.total}")
     print(f"Has more sessions: {session_list.has_more}")
-    for session in session_list.sessions:
-        print(session.session_id, session.status, session.metadata)
+    for s in session_list.sessions:
+        print(s.session_id, s.status, s.metadata)
 except UserNotFoundError as e:
     print(f"Error: {e}")
 ```
@@ -404,13 +405,13 @@ try:
     print(f"Total conflicts: {conflicts.total}")
     print(f"Has more: {conflicts.has_more}")
     
-    for conflict in conflicts.conflicts:
-        print(f"Conflict ID: {conflict.conflict_id}")
-        print(f"Status: {conflict.status}")
-        print(f"New memory: {conflict.new_memory_content}")
-        print(f"Conflicting memories: {len(conflict.conflicting_memories)}")
-        print(f"Questions: {len(conflict.clarifying_questions)}")
-        print(f"Created at: {conflict.created_at}")
+    for conf in conflicts.conflicts:
+        print(f"Conflict ID: {conf.conflict_id}")
+        print(f"Status: {conf.status}")
+        print(f"New memory: {conf.new_memory_content}")
+        print(f"Conflicting memories: {len(conf.conflicting_memories)}")
+        print(f"Questions: {len(conf.clarifying_questions)}")
+        print(f"Created at: {conf.created_at}")
         print("---")
         
 except UserNotFoundError as e:
@@ -432,16 +433,16 @@ try:
     
     # Examine conflicting memories
     print("\nConflicting memories:")
-    for memory in conflict.conflicting_memories:
-        print(f"  Content: {memory.content}")
-        print(f"  Reason: {memory.reason}")
+    for mem in conflict.conflicting_memories:
+        print(f"  Content: {mem.content}")
+        print(f"  Reason: {mem.reason}")
         print()
     
     # View clarifying questions
     print("Clarifying questions:")
-    for question in conflict.clarifying_questions:
-        print(f"  Question: {question.question}")
-        print(f"  Options: {question.options}")
+    for ques in conflict.clarifying_questions:
+        print(f"  Question: {ques.question}")
+        print(f"  Options: {ques.options}")
         print()
         
 except UserNotFoundError as e:
@@ -470,14 +471,14 @@ try:
     
     # Prepare answers to the clarifying questions
     answers = []
-    for question in conflict.clarifying_questions:
-        print(f"  Question: {question.question}")
-        print(f"  Options: {question.options}")
+    for ques in conflict.clarifying_questions:
+        print(f"  Question: {ques.question}")
+        print(f"  Options: {ques.options}")
         print()
 
         answer = MergeConflictAnswer(
-            question=question.question,
-            answer=question.options[0],  # Select first option
+            question=ques.question,
+            answer=ques.options[0],  # Select first option
             message="User prefers this option based on recent conversation"
         )
         answers.append(answer)

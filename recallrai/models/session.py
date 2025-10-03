@@ -91,11 +91,15 @@ class SessionModel(BaseModel):
         Returns:
             A SessionModel instance.
         """
+        if "session" in data:
+            session_data = data["session"]
+        else:
+            session_data = data
         return cls(
-            session_id=data["session_id"],
-            status=data["status"],
-            created_at=data["created_at"],
-            metadata=data["metadata"],
+            session_id=session_data["session_id"],
+            status=session_data["status"],
+            created_at=session_data["created_at"],
+            metadata=session_data["metadata"],
         )
 
 
@@ -110,6 +114,7 @@ class SessionList(BaseModel):
     class Config:
         """Pydantic configuration."""
         frozen = True
+        arbitrary_types_allowed = True
 
     @classmethod
     def from_api_response(cls, data: Dict[str, Any], user_id: str, http_client: HTTPClient) -> "SessionList":
