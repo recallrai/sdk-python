@@ -2,7 +2,8 @@
 HTTP client for making requests to the RecallrAI API.
 """
 
-from httpx import Response, Client, TimeoutException, NetworkError, ConnectError
+from json import JSONDecodeError
+from httpx import Response, Client, TimeoutException, ConnectError
 from typing import Any, Dict, Optional
 from ..exceptions import (
     TimeoutError, 
@@ -82,6 +83,10 @@ class HTTPClient:
                 params=params,
                 json=data,
             )
+            
+            # Try to parse to JSON to catch JSON errors early
+            _ = response.json()
+            
             if response.status_code == 422:
                 detail = response.json().get("detail", "Validation error")
                 raise ValidationError(
@@ -107,7 +112,7 @@ class HTTPClient:
                 message=f"Request timed out: {e}",
                 http_status=0  # No HTTP status for timeout
             )
-        except ConnectError as e:
+        except (ConnectError, JSONDecodeError) as e:
             raise ConnectionError(
                 message=f"Failed to connect to the API: {e}",
                 http_status=0  # No HTTP status for connection error
