@@ -185,7 +185,7 @@ class Session:
         """
         response = self._http.put(
             f"/api/v1/users/{self._user_id}/sessions/{self.session_id}",
-            data={"metadata": new_metadata or {}},
+            data={"new_metadata": new_metadata},
         )
 
         if response.status_code == 404:

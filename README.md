@@ -590,17 +590,11 @@ def chat_with_memory(user_id, session_id=None):
         context = session.get_context()  # Uses default BALANCED strategy
         
         # Create a system prompt that includes the context
-        system_prompt = f"""You are a helpful assistant with memory of previous conversations.
-        
-        MEMORIES ABOUT THE USER:
-        {context.context}
-        
-        You can use the above memories to provide better responses to the user.
-        Don't mention that you have access to memories unless you are explicitly asked."""
+        system_prompt = "You are a helpful assistant" + context.context
         
         # Get previous messages
-    messages = session.get_messages(offset=0, limit=50)
-    previous_messages = [{"role": message.role, "content": message.content} for message in messages.messages]
+        messages = session.get_messages(offset=0, limit=50)
+        previous_messages = [{"role": message.role, "content": message.content} for message in messages.messages]
 
         # Call the LLM with the system prompt and conversation history
         response = oai_client.chat.completions.create(
