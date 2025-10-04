@@ -3,7 +3,7 @@ User-related data models for the RecallrAI SDK.
 """
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 from ..utils import HTTPClient
 if TYPE_CHECKING:
@@ -80,13 +80,56 @@ class UserList(BaseModel):
         )
 
 
-class UserMemoryItem(BaseModel):
-    """Represents a single memory item for a user."""
+class MemoryVersionInfo(BaseModel):
+    """Information about a specific version of a memory."""
+    
+    version_number: int = Field(..., description="Version number (1 = oldest, N = current)")
+    content: str = Field(..., description="Content of this version")
+    created_at: datetime = Field(..., description="When this version was created")
+    expired_at: datetime = Field(..., description="When this version expired")
+    expiration_reason: str = Field(..., description="Why this version expired (NewMemoryVersionCreationReason enum)")
 
-    memory_id: str
-    categories: List[str]
-    content: str
-    created_at: datetime
+    class Config:
+        frozen = True
+        json_encoders = {
+            datetime: lambda dt: dt.isoformat()
+        }
+
+
+class MemoryRelationship(BaseModel):
+    """Connected memory information."""
+    
+    memory_id: str = Field(..., description="ID of the connected memory")
+    content: str = Field(..., description="Brief content for context")
+
+    class Config:
+        frozen = True
+
+
+class UserMemoryItem(BaseModel):
+    """Complete memory information with all metadata."""
+
+    memory_id: str = Field(..., description="ID of the current/latest version")
+    categories: List[str] = Field(..., description="Memory categories")
+    content: str = Field(..., description="Current version content")
+    created_at: datetime = Field(..., description="When the latest version was created")
+    
+    # Version information
+    version_number: int = Field(..., description="Which version this is (e.g., 3 means 3rd version)")
+    total_versions: int = Field(..., description="How many versions exist total")
+    has_previous_versions: bool = Field(..., description="If total_versions > 1")
+    
+    # Version history (only if requested)
+    previous_versions: Optional[List[MemoryVersionInfo]] = Field(None, description="Memories connected via prev_version_id")
+    
+    # Relationships (only if requested)
+    connected_memories: Optional[List[MemoryRelationship]] = Field(None, description="Memories connected via ProjectUserMemoryConnections")
+    
+    # Merge conflict info
+    merge_conflict_in_progress: bool = Field(..., description="Whether a merge conflict is in progress")
+    
+    # Session info
+    session_id: str = Field(..., description="Which session created this version")
 
     class Config:
         frozen = True

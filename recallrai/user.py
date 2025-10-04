@@ -292,14 +292,18 @@ class User:
         offset: int = 0,
         limit: int = 20,
         categories: Optional[List[str]] = None,
+        include_previous_versions: bool = True,
+        include_connected_memories: bool = True,
     ) -> UserMemoriesList:
         """
         List memories for this user with optional category filters.
 
         Args:
             offset: Number of records to skip.
-            limit: Maximum number of records to return.
+            limit: Maximum number of records to return (1-200).
             categories: Optional list of category names to filter by.
+            include_previous_versions: Include full version history for each memory (default: True).
+            include_connected_memories: Include connected memories (default: True).
 
         Returns:
             UserMemoriesList: Paginated list of memory items.
@@ -312,7 +316,12 @@ class User:
             TimeoutError: If the request times out.
             RecallrAIError: For other API-related errors.
         """
-        params: Dict[str, Any] = {"offset": offset, "limit": limit}
+        params: Dict[str, Any] = {
+            "offset": offset,
+            "limit": limit,
+            "include_previous_versions": include_previous_versions,
+            "include_connected_memories": include_connected_memories,
+        }
         if categories is not None:
             params["categories"] = categories
 

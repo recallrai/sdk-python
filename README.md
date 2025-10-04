@@ -336,25 +336,77 @@ from recallrai.exceptions import UserNotFoundError, InvalidCategoriesError
 
 try:
     user = client.get_user("user123")
+    
+    # List memories with all available options
     memories = user.list_memories(
-        categories=["food_preferences", "allergies"],  # optional
+        categories=["food_preferences", "allergies"],  # optional: filter by categories
         offset=0,
-        limit=20,
+        limit=20,  # max 200
+        include_previous_versions=True,  # default: True - include version history
+        include_connected_memories=True,  # default: True - include related memories
     )
+    
     for mem in memories.items:
         print(f"Memory ID: {mem.memory_id}")
         print(f"Categories: {mem.categories}")
         print(f"Content: {mem.content}")
         print(f"Created at: {mem.created_at}")
+        print(f"Session ID: {mem.session_id}")
+        
+        # Version information
+        print(f"Version: {mem.version_number} of {mem.total_versions}")
+        print(f"Has previous versions: {mem.has_previous_versions}")
+        
+        # Previous versions (if included)
+        if mem.previous_versions:
+            print(f"Previous versions: {len(mem.previous_versions)}")
+            for version in mem.previous_versions:
+                print(f"  - Version {version.version_number}: {version.content}")
+                print(f"    Created: {version.created_at}, Expired: {version.expired_at}")
+                print(f"    Expiration reason: {version.expiration_reason}")
+        
+        # Connected memories (if included)
+        if mem.connected_memories:
+            print(f"Connected memories: {len(mem.connected_memories)}")
+            for connected in mem.connected_memories:
+                print(f"  - {connected.memory_id}: {connected.content}")
+        
+        # Merge conflict status
+        print(f"Merge conflict in progress: {mem.merge_conflict_in_progress}")
         print("---")
+    
     print(f"Has more?: {memories.has_more}")
     print(f"Total memories: {memories.total}")
+    
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except InvalidCategoriesError as e:
     print(f"Invalid categories: {e.invalid_categories}")
     print(f"Error: {e}")
 ```
+
+#### Memory Item Fields
+
+Each memory item returned contains the following information:
+
+- **memory_id**: Unique identifier for the current/latest version of the memory
+- **categories**: List of category strings the memory belongs to
+- **content**: The current version's content text
+- **created_at**: Timestamp when the latest version was created
+- **session_id**: ID of the session that created this version
+- **version_number**: Which version this is (e.g., 3 means this is the 3rd version)
+- **total_versions**: Total number of versions that exist for this memory
+- **has_previous_versions**: Boolean indicating if `total_versions > 1`
+- **previous_versions** (optional): List of `MemoryVersionInfo` objects containing:
+  - `version_number`: Sequential version number (1 = oldest)
+  - `content`: Content of that version
+  - `created_at`: When this version was created
+  - `expired_at`: When this version expired
+  - `expiration_reason`: Why it expired (e.g., new version created)
+- **connected_memories** (optional): List of `MemoryRelationship` objects containing:
+  - `memory_id`: ID of the connected memory
+  - `content`: Brief content for context
+- **merge_conflict_in_progress**: Boolean indicating if this memory has an active merge conflict
 
 ## User Messages
 
