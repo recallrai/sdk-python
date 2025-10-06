@@ -40,8 +40,8 @@ class HTTPClient:
         self.client = Client(
             timeout=self.timeout,
             headers={
-                "X-Api-Key": self.api_key,
-                "X-Project-Id": self.project_id,
+                "X-Recallr-Api-Key": self.api_key,
+                "X-Recallr-Project-Id": self.project_id,
                 "Content-Type": "application/json",
                 "Accept": "application/json",
                 "User-Agent": f"RecallrAI-Python-SDK/RecallrAI-Python-SDK/RecallrAI-Python-SDK/0.3.0",
