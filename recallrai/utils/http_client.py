@@ -44,7 +44,7 @@ class HTTPClient:
                 "X-Project-Id": self.project_id,
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "User-Agent": f"RecallrAI-Python-SDK/RecallrAI-Python-SDK/0.2.0",
+                "User-Agent": f"RecallrAI-Python-SDK/RecallrAI-Python-SDK/RecallrAI-Python-SDK/0.2.0",
             },
         )
 
