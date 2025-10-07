@@ -290,6 +290,7 @@ try:
     # - last_n_messages: Number of last messages to include in context (optional, range: 1-100)
     # - last_n_summaries: Number of last summaries to include in context (optional, range: 1-20)
     # - timezone: Timezone for formatting timestamps (optional, e.g., 'America/New_York', None for UTC)
+    # - include_system_prompt: Whether to include the default system prompt of Recallr AI (default: True)
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:

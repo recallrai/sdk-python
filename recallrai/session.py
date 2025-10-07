@@ -103,7 +103,8 @@ class Session:
         summaries_threshold: float = 0.5,
         last_n_messages: Optional[int] = None, 
         last_n_summaries: Optional[int] = None,
-        timezone: Optional[str] = None
+        timezone: Optional[str] = None,
+        include_system_prompt: bool = True
     ) -> Context:
         """
         Get the current context for this session.
@@ -117,6 +118,7 @@ class Session:
             last_n_messages: Number of last messages to include in context.
             last_n_summaries: Number of last summaries to include in context.
             timezone: Timezone for formatting timestamps (e.g., 'America/New_York'). None for UTC.
+            include_system_prompt: Whether to include the default system prompt of Recallr AI. Defaults to True.
 
         Returns:
             Context information with the memory text and whether memory was used.
@@ -136,6 +138,7 @@ class Session:
             "max_top_k": max_top_k,
             "memories_threshold": memories_threshold,
             "summaries_threshold": summaries_threshold,
+            "include_system_prompt": include_system_prompt,
         }
         if last_n_messages is not None:
             params["last_n_messages"] = last_n_messages
