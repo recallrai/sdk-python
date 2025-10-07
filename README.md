@@ -202,18 +202,20 @@ except SessionNotFoundError as e:
 ### List Sessions
 
 ```python
+from recallrai.models import SessionStatus
 from recallrai.exceptions import UserNotFoundError
 
 try:
     # First, get the user
     user = client.get_user("user123")
     
-    # List sessions for this user with optional metadata filters
+    # List sessions for this user with optional filters
     session_list = user.list_sessions(
         offset=0,
         limit=10,
-        metadata_filter={"type": "chat"},           # optional
-        user_metadata_filter={"role": "admin"}       # optional
+        metadata_filter={"type": "chat"},           # optional: filter by session metadata
+        user_metadata_filter={"role": "admin"},     # optional: filter by user metadata
+        status_filter=[SessionStatus.PENDING, SessionStatus.PROCESSING]     # optional: filter by session status
     )
     print(f"Total sessions: {session_list.total}")
     print(f"Has more sessions: {session_list.has_more}")

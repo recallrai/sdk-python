@@ -62,6 +62,7 @@ class SessionStatus(str, enum.Enum):
     PENDING = "pending"
     PROCESSING = "processing"
     PROCESSED = "processed"
+    INSUFFICIENT_BALANCE = "insufficient_balance"
 
 
 class SessionModel(BaseModel):
