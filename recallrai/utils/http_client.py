@@ -84,10 +84,10 @@ class HTTPClient:
                 json=data,
             )
             
-            # Try to parse to JSON to catch JSON errors early
-            _ = response.json()
+            if response.status_code == 204:
+                return response  # No content to parse
             
-            if response.status_code == 422:
+            elif response.status_code == 422:
                 detail = response.json().get("detail", "Validation error")
                 raise ValidationError(
                     message=detail,
@@ -105,6 +105,9 @@ class HTTPClient:
                     message=detail,
                     http_status=response.status_code
                 )
+            
+            # Try to parse to JSON to catch JSON errors early
+            _ = response.json()
             
             return response
         except TimeoutException as e:
