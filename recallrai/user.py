@@ -293,16 +293,20 @@ class User:
         offset: int = 0,
         limit: int = 20,
         categories: Optional[List[str]] = None,
+        session_id_filter: Optional[List[str]] = None,
+        session_metadata_filter: Optional[Dict[str, Any]] = None,
         include_previous_versions: bool = True,
         include_connected_memories: bool = True,
     ) -> UserMemoriesList:
         """
-        List memories for this user with optional category filters.
+        List memories for this user with optional category and session filters.
 
         Args:
             offset: Number of records to skip.
             limit: Maximum number of records to return (1-200).
             categories: Optional list of category names to filter by.
+            session_id_filter: Optional list of session IDs to filter by.
+            session_metadata_filter: Optional dict to filter by session metadata (exact match on keys -> values).
             include_previous_versions: Include full version history for each memory (default: True).
             include_connected_memories: Include connected memories (default: True).
 
@@ -325,6 +329,10 @@ class User:
         }
         if categories is not None:
             params["categories"] = categories
+        if session_id_filter is not None:
+            params["session_id_filter"] = session_id_filter
+        if session_metadata_filter is not None:
+            params["session_metadata_filter"] = json.dumps(session_metadata_filter)
 
         response = self._http.get(
             f"/api/v1/users/{self.user_id}/memories",

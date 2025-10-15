@@ -342,6 +342,8 @@ try:
     # List memories with all available options
     memories = user.list_memories(
         categories=["food_preferences", "allergies"],  # optional: filter by categories
+        session_id_filter=["session-uuid-1", "session-uuid-2"],  # optional: filter by specific sessions
+        session_metadata_filter={"environment": "production"},  # optional: filter by session metadata
         offset=0,
         limit=20,  # max 200
         include_previous_versions=True,  # default: True - include version history
