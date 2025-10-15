@@ -1,10 +1,10 @@
 """
-User management functionality for the RecallrAI SDK.
+Async user management functionality for the RecallrAI SDK.
 """
 
 import json
 from typing import Any, List, Dict, Optional
-from .utils import HTTPClient
+from .utils.async_http_client import AsyncHTTPClient
 from .models import (
     UserModel, 
     SessionModel, 
@@ -16,8 +16,8 @@ from .models import (
     MergeConflictStatus,
     MergeConflictModel,
 )
-from .session import Session
-from .merge_conflict import MergeConflict
+from .async_session import AsyncSession
+from .async_merge_conflict import AsyncMergeConflict
 from .exceptions import (
     UserNotFoundError,
     UserAlreadyExistsError,
@@ -30,24 +30,25 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
-class User:
+
+class AsyncUser:
     """
-    Represents a user in the RecallrAI system with methods for user management.
+    Async user manager for the RecallrAI system.
     
-    This class wraps a user object and provides methods for updating user data,
+    This class wraps a user object and provides async methods for updating user data,
     and for creating and managing sessions.
     """
 
     def __init__(
         self,
-        http_client: HTTPClient,
+        http_client: AsyncHTTPClient,
         user_data: UserModel,
     ):
         """
-        Initialize a user.
+        Initialize an async user.
 
         Args:
-            http_client: HTTP client for API communication.
+            http_client: Async HTTP client for API communication.
             user_data: User data model with user information.
         """
         self._http = http_client
@@ -57,9 +58,9 @@ class User:
         self.created_at = user_data.created_at
         self.last_active_at = user_data.last_active_at
 
-    def update(self, new_metadata: Optional[Dict[str, Any]] = None, new_user_id: Optional[str] = None) -> None:
+    async def update(self, new_metadata: Optional[Dict[str, Any]] = None, new_user_id: Optional[str] = None) -> None:
         """
-        Update this user's metadata or ID.
+        Update this user's metadata or ID asynchronously.
 
         Args:
             new_metadata: New metadata to associate with the user.
@@ -80,7 +81,7 @@ class User:
         if new_user_id is not None:
             data["new_user_id"] = new_user_id
             
-        response = self._http.put(f"/api/v1/users/{self.user_id}", data=data)
+        response = await self._http.put(f"/api/v1/users/{self.user_id}", data=data)
         
         if response.status_code == 404:
             detail = response.json().get("detail", f"User with ID {self.user_id} not found")
@@ -102,9 +103,9 @@ class User:
         self.metadata = updated_data.metadata
         self.last_active_at = updated_data.last_active_at
 
-    def refresh(self) -> None:
+    async def refresh(self) -> None:
         """
-        Refresh this user's data from the server.
+        Refresh this user's data from the server asynchronously.
         
         Raises:
             UserNotFoundError: If the user is not found.
@@ -114,7 +115,7 @@ class User:
             TimeoutError: If the request times out.
             RecallrAIError: For other API-related errors.
         """
-        response = self._http.get(f"/api/v1/users/{self.user_id}")
+        response = await self._http.get(f"/api/v1/users/{self.user_id}")
         
         if response.status_code == 404:
             detail = response.json().get("detail", f"User with ID {self.user_id} not found")
@@ -134,9 +135,9 @@ class User:
         self.created_at = refreshed_data.created_at
         self.last_active_at = refreshed_data.last_active_at
 
-    def delete(self) -> None:
+    async def delete(self) -> None:
         """
-        Delete this user.
+        Delete this user asynchronously.
 
         Raises:
             UserNotFoundError: If the user is not found.
@@ -146,7 +147,7 @@ class User:
             TimeoutError: If the request times out.
             RecallrAIError: For other API-related errors.
         """
-        response = self._http.delete(f"/api/v1/users/{self.user_id}")
+        response = await self._http.delete(f"/api/v1/users/{self.user_id}")
         
         if response.status_code == 404:
             detail = response.json().get("detail", f"User with ID {self.user_id} not found")
@@ -157,20 +158,20 @@ class User:
                 http_status=response.status_code
             )
 
-    def create_session(
+    async def create_session(
         self,
         auto_process_after_seconds: int = 600,
         metadata: Optional[Dict[str, Any]] = None,
-    ) -> Session:
+    ) -> AsyncSession:
         """
-        Create a new session for this user.
+        Create a new session for this user asynchronously.
 
         Args:
-            auto_process_after_seconds: Seconds of inactivity allowed before automaticly processing the session (min 600).
+            auto_process_after_seconds: Seconds of inactivity allowed before automatically processing the session (min 600).
             metadata: Optional metadata for the session.
 
         Returns:
-            A Session object to interact with the created session.
+            An AsyncSession object to interact with the created session.
 
         Raises:
             UserNotFoundError: If the user is not found.
@@ -184,7 +185,7 @@ class User:
             "auto_process_after_seconds": auto_process_after_seconds,
             "metadata": metadata or {},
         }
-        response = self._http.post(
+        response = await self._http.post(
             f"/api/v1/users/{self.user_id}/sessions",
             data=payload,
         )
@@ -199,17 +200,17 @@ class User:
             )
         
         session_data = SessionModel.from_api_response(response.json())
-        return Session(self._http, self.user_id, session_data)
+        return AsyncSession(self._http, self.user_id, session_data)
 
-    def get_session(self, session_id: str) -> Session:
+    async def get_session(self, session_id: str) -> AsyncSession:
         """
-        Get an existing session for this user.
+        Get an existing session for this user asynchronously.
 
         Args:
             session_id: ID of the session to retrieve.
 
         Returns:
-            A Session object to interact with the session.
+            An AsyncSession object to interact with the session.
 
         Raises:
             UserNotFoundError: If the user is not found.
@@ -221,7 +222,7 @@ class User:
             RecallrAIError: For other API-related errors.
         """
         # First, verify the session exists by fetching its details
-        response = self._http.get(f"/api/v1/users/{self.user_id}/sessions/{session_id}")
+        response = await self._http.get(f"/api/v1/users/{self.user_id}/sessions/{session_id}")
         
         if response.status_code == 404:
             # Check if it's a user not found or session not found error
@@ -237,9 +238,9 @@ class User:
             )
         
         session_data = SessionModel.from_api_response(response.json())
-        return Session(self._http, self.user_id, session_data)
+        return AsyncSession(self._http, self.user_id, session_data)
 
-    def list_sessions(
+    async def list_sessions(
         self,
         offset: int = 0,
         limit: int = 10,
@@ -247,13 +248,13 @@ class User:
         status_filter: Optional[List[SessionStatus]] = None,
     ) -> SessionList:
         """
-        List sessions for this user with pagination.
+        List sessions for this user with pagination asynchronously.
 
         Args:
             offset: Number of records to skip.
             limit: Maximum number of records to return.
             metadata_filter: Optional metadata filter for sessions.
-            status_filter: Optional list of session statuses to filter by (e.g., ["pending", "processing", "processed", "insufficient_balance"]).
+            status_filter: Optional list of session statuses to filter by.
 
         Returns:
             List of sessions with pagination info.
@@ -272,7 +273,7 @@ class User:
         if status_filter is not None:
             params["status_filter"] = [status.value for status in status_filter]
 
-        response = self._http.get(
+        response = await self._http.get(
             f"/api/v1/users/{self.user_id}/sessions",
             params=params,
         )
@@ -286,9 +287,9 @@ class User:
                 http_status=response.status_code
             )
             
-        return SessionList.from_api_response(response.json(), self.user_id, self._http)
+        return SessionList.from_api_response_async(response.json(), self.user_id, self._http)
 
-    def list_memories(
+    async def list_memories(
         self,
         offset: int = 0,
         limit: int = 20,
@@ -299,7 +300,7 @@ class User:
         include_connected_memories: bool = True,
     ) -> UserMemoriesList:
         """
-        List memories for this user with optional category and session filters.
+        List memories for this user with optional category and session filters asynchronously.
 
         Args:
             offset: Number of records to skip.
@@ -334,7 +335,7 @@ class User:
         if session_metadata_filter is not None:
             params["session_metadata_filter"] = json.dumps(session_metadata_filter)
 
-        response = self._http.get(
+        response = await self._http.get(
             f"/api/v1/users/{self.user_id}/memories",
             params=params,
         )
@@ -357,7 +358,7 @@ class User:
 
         return UserMemoriesList.from_api_response(response.json())
 
-    def list_merge_conflicts(
+    async def list_merge_conflicts(
         self,
         offset: int = 0,
         limit: int = 10,
@@ -366,7 +367,7 @@ class User:
         sort_order: str = "desc",
     ) -> MergeConflictList:
         """
-        List merge conflicts for this user.
+        List merge conflicts for this user asynchronously.
 
         Args:
             offset: Number of records to skip.
@@ -395,7 +396,7 @@ class User:
         if status is not None:
             params["status"] = status.value
 
-        response = self._http.get(
+        response = await self._http.get(
             f"/api/v1/users/{self.user_id}/merge-conflicts",
             params=params,
         )
@@ -409,17 +410,17 @@ class User:
                 http_status=response.status_code,
             )
 
-        return MergeConflictList.from_api_response(response.json(), self.user_id, self._http)
+        return MergeConflictList.from_api_response_async(response.json(), self.user_id, self._http)
 
-    def get_merge_conflict(self, conflict_id: str) -> MergeConflict:
+    async def get_merge_conflict(self, conflict_id: str) -> AsyncMergeConflict:
         """
-        Get a specific merge conflict by ID.
+        Get a specific merge conflict by ID asynchronously.
 
         Args:
             conflict_id: Unique identifier of the merge conflict.
 
         Returns:
-            MergeConflict: The merge conflict object.
+            AsyncMergeConflict: The async merge conflict object.
 
         Raises:
             UserNotFoundError: If the user is not found.
@@ -430,7 +431,7 @@ class User:
             TimeoutError: If the request times out.
             RecallrAIError: For other API-related errors.
         """
-        response = self._http.get(
+        response = await self._http.get(
             f"/api/v1/users/{self.user_id}/merge-conflicts/{conflict_id}"
         )
 
@@ -448,11 +449,11 @@ class User:
             )
 
         conflict_data = MergeConflictModel.from_api_response(response.json())
-        return MergeConflict(self._http, self.user_id, conflict_data)
+        return AsyncMergeConflict(self._http, self.user_id, conflict_data)
 
-    def get_last_n_messages(self, n: int) -> UserMessagesList:
+    async def get_last_n_messages(self, n: int) -> UserMessagesList:
         """
-        Get the last N messages for this user across all their sessions.
+        Get the last N messages for this user across all their sessions asynchronously.
 
         This method is useful for chatbot applications where you want to see
         the recent conversation history for context.
@@ -475,7 +476,7 @@ class User:
         if not (1 <= n <= 100):
             raise ValueError("n must be between 1 and 100")
         
-        response = self._http.get(
+        response = await self._http.get(
             f"/api/v1/users/{self.user_id}/messages",
             params={"limit": n}
         )
@@ -492,4 +493,4 @@ class User:
         return UserMessagesList.from_api_response(response.json())
 
     def __repr__(self) -> str:
-        return f"<User id={self.user_id} created_at={self.created_at} last_active_at={self.last_active_at}>"
+        return f"<AsyncUser id={self.user_id} created_at={self.created_at} last_active_at={self.last_active_at}>"

@@ -14,6 +14,10 @@ poetry add recallrai
 pip install recallrai
 ```
 
+## Async Support
+
+The SDK provides full async/await support for all operations! Use `AsyncRecallrAI`, `AsyncUser`, and `AsyncSession` for async applications. All usage patterns are identical to the sync versions, just with `await` keywords.
+
 ## Initialization
 
 Create a client instance with your API key and project ID:

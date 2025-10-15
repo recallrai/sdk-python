@@ -4,12 +4,13 @@ Merge conflict-related data models for the RecallrAI SDK.
 
 import enum
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 from ..utils import HTTPClient
 
 if TYPE_CHECKING:
     from ..merge_conflict import MergeConflict
+    from ..async_merge_conflict import AsyncMergeConflict
 
 
 class MergeConflictStatus(str, enum.Enum):
@@ -117,7 +118,7 @@ class MergeConflictList(BaseModel):
     """
     Represents a paginated list of merge conflicts.
     """
-    conflicts: List["MergeConflict"] = Field(..., description="List of merge conflicts.")
+    conflicts: List[Union["MergeConflict", "AsyncMergeConflict"]] = Field(..., description="List of merge conflicts.")
     total: int = Field(..., description="Total number of conflicts.")
     has_more: bool = Field(..., description="Whether there are more conflicts to fetch.")
 
@@ -127,14 +128,14 @@ class MergeConflictList(BaseModel):
         arbitrary_types_allowed = True
 
     @classmethod
-    def from_api_response(cls, data: Dict[str, Any], http_client: HTTPClient, user_id: str) -> "MergeConflictList":
+    def from_api_response(cls, data: Dict[str, Any], user_id: str, http_client: HTTPClient) -> "MergeConflictList":
         """
         Create a MergeConflictList instance from an API response.
 
         Args:
             data: API response data.
-            http_client: HTTP client for making API requests.
             user_id: User ID who owns these conflicts.
+            http_client: HTTP client for making API requests.
 
         Returns:
             A MergeConflictList instance.
@@ -144,6 +145,30 @@ class MergeConflictList(BaseModel):
         return cls(
             conflicts=[
                 MergeConflict(http_client, user_id, MergeConflictModel.from_api_response(conflict))
+                for conflict in data["conflicts"]
+            ],
+            total=data["total"],
+            has_more=data["has_more"],
+        )
+
+    @classmethod
+    def from_api_response_async(cls, data: Dict[str, Any], user_id: str, http_client: Any) -> "MergeConflictList":
+        """
+        Create a MergeConflictList instance from an API response for async client.
+
+        Args:
+            data: API response data.
+            user_id: User ID who owns these conflicts.
+            http_client: Async HTTP client for making API requests.
+
+        Returns:
+            A MergeConflictList instance with async conflicts.
+        """
+        from ..async_merge_conflict import AsyncMergeConflict
+        
+        return cls(
+            conflicts=[
+                AsyncMergeConflict(http_client, user_id, MergeConflictModel.from_api_response(conflict))
                 for conflict in data["conflicts"]
             ],
             total=data["total"],

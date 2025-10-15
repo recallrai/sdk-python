@@ -3,11 +3,12 @@ User-related data models for the RecallrAI SDK.
 """
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 from ..utils import HTTPClient
 if TYPE_CHECKING:
     from ..user import User
+    from ..async_user import AsyncUser
 
 
 class UserModel(BaseModel):
@@ -52,7 +53,7 @@ class UserModel(BaseModel):
 class UserList(BaseModel):
     """Represents a paginated list of users."""
 
-    users: List["User"] = Field(..., description="List of users.")
+    users: List[Union["User", "AsyncUser"]] = Field(..., description="List of users.")
     total: int = Field(..., description="Total number of users.")
     has_more: bool = Field(..., description="Whether there are more users to fetch.")
 
@@ -66,6 +67,7 @@ class UserList(BaseModel):
 
         Args:
             data: API response data.
+            http_client: HTTP client for making API requests.
 
         Returns:
             A UserList instance.
@@ -74,6 +76,27 @@ class UserList(BaseModel):
         return cls(
             users=[
                 User(http_client, UserModel.from_api_response(user)) for user in data["users"]
+            ],
+            total=data["total"],
+            has_more=data["has_more"],
+        )
+
+    @classmethod
+    def from_api_response_async(cls, data: Dict[str, Any], http_client: Any) -> "UserList":
+        """
+        Create a UserList instance from an API response for async client.
+
+        Args:
+            data: API response data.
+            http_client: Async HTTP client for making API requests.
+
+        Returns:
+            A UserList instance with async users.
+        """
+        from ..async_user import AsyncUser
+        return cls(
+            users=[
+                AsyncUser(http_client, UserModel.from_api_response(user)) for user in data["users"]
             ],
             total=data["total"],
             has_more=data["has_more"],

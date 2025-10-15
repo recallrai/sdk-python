@@ -4,11 +4,12 @@ Session-related data models for the RecallrAI SDK.
 
 import enum
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 from pydantic import BaseModel, Field
 from ..utils import HTTPClient
 if TYPE_CHECKING:
     from ..session import Session
+    from ..async_session import AsyncSession
 
 class MessageRole(str, enum.Enum):
     """
@@ -109,7 +110,7 @@ class SessionList(BaseModel):
     """
     Represents a paginated list of sessions.
     """
-    sessions: List["Session"] = Field(..., description="List of sessions.")
+    sessions: List[Union["Session", "AsyncSession"]] = Field(..., description="List of sessions.")
     total: int = Field(..., description="Total number of sessions.")
     has_more: bool = Field(..., description="Whether there are more sessions to fetch.")
 
@@ -125,6 +126,8 @@ class SessionList(BaseModel):
 
         Args:
             data: API response data.
+            user_id: User ID who owns these sessions.
+            http_client: HTTP client for making API requests.
 
         Returns:
             A SessionList instance.
@@ -133,6 +136,28 @@ class SessionList(BaseModel):
         return cls(
             sessions=[
                 Session(http_client, user_id, SessionModel.from_api_response(session)) for session in data["sessions"]
+            ],
+            total=data["total"],
+            has_more=data["has_more"],
+        )
+
+    @classmethod
+    def from_api_response_async(cls, data: Dict[str, Any], user_id: str, http_client: Any) -> "SessionList":
+        """
+        Create a SessionList instance from an API response for async client.
+
+        Args:
+            data: API response data.
+            user_id: User ID who owns these sessions.
+            http_client: Async HTTP client for making API requests.
+
+        Returns:
+            A SessionList instance with async sessions.
+        """
+        from ..async_session import AsyncSession
+        return cls(
+            sessions=[
+                AsyncSession(http_client, user_id, SessionModel.from_api_response(session)) for session in data["sessions"]
             ],
             total=data["total"],
             has_more=data["has_more"],
