@@ -214,7 +214,6 @@ try:
         offset=0,
         limit=10,
         metadata_filter={"type": "chat"},           # optional: filter by session metadata
-        user_metadata_filter={"role": "admin"},     # optional: filter by user metadata
         status_filter=[SessionStatus.PENDING, SessionStatus.PROCESSING]     # optional: filter by session status
     )
     print(f"Total sessions: {session_list.total}")

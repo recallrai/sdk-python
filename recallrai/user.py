@@ -244,7 +244,6 @@ class User:
         offset: int = 0,
         limit: int = 10,
         metadata_filter: Optional[Dict[str, Any]] = None,
-        user_metadata_filter: Optional[Dict[str, Any]] = None,
         status_filter: Optional[List[SessionStatus]] = None,
     ) -> SessionList:
         """
@@ -254,7 +253,6 @@ class User:
             offset: Number of records to skip.
             limit: Maximum number of records to return.
             metadata_filter: Optional metadata filter for sessions.
-            user_metadata_filter: Optional metadata filter for the user.
             status_filter: Optional list of session statuses to filter by (e.g., ["pending", "processing", "processed", "insufficient_balance"]).
 
         Returns:
@@ -271,8 +269,6 @@ class User:
         params: Dict[str, Any] = {"offset": offset, "limit": limit}
         if metadata_filter is not None:
             params["metadata_filter"] = json.dumps(metadata_filter)
-        if user_metadata_filter is not None:
-            params["user_metadata_filter"] = json.dumps(user_metadata_filter)
         if status_filter is not None:
             params["status_filter"] = [status.value for status in status_filter]
 
