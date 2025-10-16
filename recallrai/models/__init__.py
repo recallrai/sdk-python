@@ -12,7 +12,15 @@ from .user import (
     MemoryVersionInfo,
     MemoryRelationship,
 )
-from .session import SessionModel, SessionList, SessionMessagesList, MessageRole, SessionStatus, Context, RecallStrategy
+from .session import (
+    SessionModel, 
+    SessionList, 
+    SessionMessagesList, 
+    MessageRole, 
+    SessionStatus, 
+    Context, 
+    RecallStrategy,
+)
 from .merge_conflict import (
     MergeConflictModel, 
     MergeConflictList, 
