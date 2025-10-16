@@ -25,3 +25,22 @@ __all__ = [
     "AsyncSession",
     "AsyncMergeConflict",
 ]
+
+# Fix pydantic v2 import issues by rebuilding models
+from .user import User as _User
+from .async_user import AsyncUser as _AsyncUser
+from .models.user import UserList as _UserListModel
+_UserListModel.model_rebuild()
+del _User, _AsyncUser, _UserListModel
+
+from .session import Session as _Session
+from .async_session import AsyncSession as _AsyncSession
+from .models.session import SessionList as _SessionListModel
+_SessionListModel.model_rebuild()
+del _Session, _AsyncSession, _SessionListModel
+
+from .merge_conflict import MergeConflict as _MergeConflict
+from .async_merge_conflict import AsyncMergeConflict as _AsyncMergeConflict
+from .models.merge_conflict import MergeConflictList as _MergeConflictListModel
+_MergeConflictListModel.model_rebuild()
+del _MergeConflict, _AsyncMergeConflict, _MergeConflictListModel
