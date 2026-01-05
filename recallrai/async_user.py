@@ -3,6 +3,7 @@ Async user management functionality for the RecallrAI SDK.
 """
 
 import json
+from datetime import datetime
 from typing import Any, List, Dict, Optional
 from .utils.async_http_client import AsyncHTTPClient
 from .models import (
@@ -162,6 +163,7 @@ class AsyncUser:
         self,
         auto_process_after_seconds: int = 600,
         metadata: Optional[Dict[str, Any]] = None,
+        custom_created_at_utc: Optional[datetime] = None,
     ) -> AsyncSession:
         """
         Create a new session for this user asynchronously.
@@ -169,6 +171,8 @@ class AsyncUser:
         Args:
             auto_process_after_seconds: Seconds of inactivity allowed before automatically processing the session (min 600).
             metadata: Optional metadata for the session.
+            custom_created_at_utc: Optional custom timestamp for when the session was created (UTC). 
+                Useful for benchmarking or importing historical data. If not provided, uses current time.
 
         Returns:
             An AsyncSession object to interact with the created session.
@@ -185,6 +189,8 @@ class AsyncUser:
             "auto_process_after_seconds": auto_process_after_seconds,
             "metadata": metadata or {},
         }
+        if custom_created_at_utc is not None:
+            payload["custom_created_at_utc"] = custom_created_at_utc.isoformat()
         response = await self._http.post(
             f"/api/v1/users/{self.user_id}/sessions",
             data=payload,
