@@ -171,13 +171,16 @@ class AsyncUser:
         Args:
             auto_process_after_seconds: Seconds of inactivity allowed before automatically processing the session (min 600).
             metadata: Optional metadata for the session.
-            custom_created_at_utc: Optional custom timestamp for when the session was created (UTC). 
-                Useful for benchmarking or importing historical data. If not provided, uses current time.
+            custom_created_at_utc: Optional custom timestamp for when the session was created. 
+                **Must be a timezone-aware datetime in UTC**. Useful for benchmarking or importing 
+                historical data. If not provided, uses current time.
+                Example: `datetime(2025, 6, 15, 14, 30, 0, tzinfo=timezone.utc)`
 
         Returns:
             An AsyncSession object to interact with the created session.
 
         Raises:
+            ValueError: If custom_created_at_utc is not timezone-aware or not in UTC.
             UserNotFoundError: If the user is not found.
             AuthenticationError: If the API key or project ID is invalid.
             InternalServerError: If the server encounters an error.
@@ -185,6 +188,20 @@ class AsyncUser:
             TimeoutError: If the request times out.
             RecallrAIError: For other API-related errors.
         """
+        # Validate custom_created_at_utc is UTC if provided
+        if custom_created_at_utc is not None:
+            if custom_created_at_utc.tzinfo is None:
+                raise ValueError(
+                    "custom_created_at_utc must be a timezone-aware datetime. "
+                    "Use datetime(year, month, day, hour, minute, second, tzinfo=timezone.utc)"
+                )
+            utc_offset = custom_created_at_utc.utcoffset()
+            if utc_offset is None or utc_offset.total_seconds() != 0:
+                raise ValueError(
+                    "custom_created_at_utc must be in UTC timezone. "
+                    "Use datetime.astimezone(timezone.utc) to convert or create with tzinfo=timezone.utc"
+                )
+        
         payload: Dict[str, Any] = {
             "auto_process_after_seconds": auto_process_after_seconds,
             "metadata": metadata or {},
