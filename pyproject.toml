@@ -2,7 +2,7 @@
 name = "recallrai"
 version = "0.5.1"
 description = "Official Python SDK for RecallrAI - Revolutionary contextual memory system that enables AI assistants to form meaningful connections between conversations, just like human memory."
-authors = ["Devasheesh Mishra <devasheeshmishra4@gmail.com>"]
+authors = ["Devasheesh Mishra <devasheesh@recallrai.com>"]
 license = "MIT License"
 readme = "README.md"
 repository = "https://github.com/recallrai/sdk-python"
