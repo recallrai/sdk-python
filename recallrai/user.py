@@ -367,10 +367,13 @@ class User:
             raise UserNotFoundError(message=detail, http_status=response.status_code)
         elif response.status_code == 400:
             # Backend returns 400 for invalid categories
-            detail = response.json().get('detail', 'Invalid categories provided')
+            detail_data = response.json()['detail']
+            message = detail_data['message']
+            invalid_cats = detail_data['invalid_categories']
             raise InvalidCategoriesError(
-                message=detail,
-                http_status=response.status_code
+                message=message,
+                http_status=response.status_code,
+                invalid_categories=invalid_cats
             )
         elif response.status_code != 200:
             raise RecallrAIError(

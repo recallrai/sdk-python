@@ -41,6 +41,10 @@ class InvalidCategoriesError(UserError):
     
     This exception is typically raised when trying to filter memories
     by categories that don't exist in the project.
+    
+    Attributes:
+        invalid_categories: List of category names that don't exist in the project.
     """
-    def __init__(self, message: str, http_status: int):
+    def __init__(self, message: str, http_status: int, invalid_categories: list):
         super().__init__(message, http_status)
+        self.invalid_categories = invalid_categories
