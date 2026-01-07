@@ -104,7 +104,6 @@ class AsyncSession:
         summaries_threshold: float = 0.5,
         last_n_messages: Optional[int] = None, 
         last_n_summaries: Optional[int] = None,
-        timezone: Optional[str] = None,
         include_system_prompt: bool = True
     ) -> Context:
         """
@@ -118,7 +117,6 @@ class AsyncSession:
             summaries_threshold: Similarity threshold for summaries.
             last_n_messages: Number of last messages to include in context.
             last_n_summaries: Number of last summaries to include in context.
-            timezone: Timezone for formatting timestamps (e.g., 'America/New_York'). None for UTC.
             include_system_prompt: Whether to include the default system prompt of Recallr AI. Defaults to True.
 
         Returns:
@@ -145,8 +143,6 @@ class AsyncSession:
             params["last_n_messages"] = last_n_messages
         if last_n_summaries is not None:
             params["last_n_summaries"] = last_n_summaries
-        if timezone is not None:
-            params["timezone"] = timezone
 
         response = await self._http.get(
             f"/api/v1/users/{self._user_id}/sessions/{self.session_id}/context",
