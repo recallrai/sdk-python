@@ -7,13 +7,13 @@ from datetime import datetime
 from typing import Any, List, Dict, Optional
 from .utils import HTTPClient
 from .models import (
-    UserModel, 
-    SessionModel, 
+    UserModel,
+    SessionModel,
     SessionStatus,
-    SessionList, 
-    UserMemoriesList, 
+    SessionList,
+    UserMemoriesList,
     UserMessagesList,
-    MergeConflictList, 
+    MergeConflictList,
     MergeConflictStatus,
     MergeConflictModel,
 )
