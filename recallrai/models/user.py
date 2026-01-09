@@ -108,6 +108,8 @@ class MemoryVersionInfo(BaseModel):
     
     version_number: int = Field(..., description="Version number (1 = oldest, N = current)")
     content: str = Field(..., description="Content of this version")
+    event_date_start: datetime = Field(..., description="When the event started (actual event time)")
+    event_date_end: datetime = Field(..., description="When the event ended (actual event time)")
     created_at: datetime = Field(..., description="When this version was created")
     expired_at: datetime = Field(..., description="When this version expired")
     expiration_reason: str = Field(..., description="Why this version expired (NewMemoryVersionCreationReason enum)")
@@ -135,6 +137,8 @@ class UserMemoryItem(BaseModel):
     memory_id: str = Field(..., description="ID of the current/latest version")
     categories: List[str] = Field(..., description="Memory categories")
     content: str = Field(..., description="Current version content")
+    event_date_start: datetime = Field(..., description="When the event started (actual event time)")
+    event_date_end: datetime = Field(..., description="When the event ended (actual event time)")
     created_at: datetime = Field(..., description="When the latest version was created")
     
     # Version information
