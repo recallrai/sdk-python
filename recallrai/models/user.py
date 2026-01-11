@@ -43,7 +43,7 @@ class UserModel(BaseModel):
             user_data = data
 
         return cls(
-            user_id=user_data["user_id"],
+            user_id=user_data["custom_user_id"],
             metadata=user_data.get("metadata", {}),
             created_at=user_data["created_at"],
             last_active_at=user_data["last_active_at"],

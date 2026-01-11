@@ -80,7 +80,7 @@ class AsyncUser:
         if new_metadata is not None:
             data["new_metadata"] = new_metadata
         if new_user_id is not None:
-            data["new_user_id"] = new_user_id
+            data["new_custom_user_id"] = new_user_id
             
         response = await self._http.put(f"/api/v1/users/{self.user_id}", data=data)
         
