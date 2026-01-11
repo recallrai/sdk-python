@@ -75,7 +75,7 @@ class RecallrAI:
             TimeoutError: If the request times out.
             RecallrAIError: For other API-related errors.
         """
-        response = self._http.post("/api/v1/users", data={"user_id": user_id, "metadata": metadata or {}})
+        response = self._http.post("/api/v1/users", data={"custom_user_id": user_id, "metadata": metadata or {}})
         if response.status_code == 409:
             detail = response.json().get("detail", f"User with ID {user_id} already exists")
             raise UserAlreadyExistsError(message=detail, http_status=response.status_code)
