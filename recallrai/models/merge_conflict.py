@@ -66,7 +66,6 @@ class MergeConflictModel(BaseModel):
     Represents a merge conflict in the RecallrAI system.
     """
     id: str = Field(..., description="Unique identifier for the merge conflict.")
-    custom_user_id: str = Field(..., description="User ID who owns this conflict.")
     project_user_session_id: str = Field(..., description="Session ID where the conflict occurred.")
     new_memory_content: str = Field(..., description="New memory content that caused the conflict.")
     conflicting_memories: List[MergeConflictMemory] = Field(..., description="Existing memories that conflict.")
@@ -98,7 +97,6 @@ class MergeConflictModel(BaseModel):
         
         return cls(
             id=conflict_data["id"],
-            custom_user_id=conflict_data["custom_user_id"],
             project_user_session_id=conflict_data["project_user_session_id"],
             new_memory_content=conflict_data["new_memory_content"],
             conflicting_memories=[
