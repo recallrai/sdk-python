@@ -24,7 +24,7 @@ class MergeConflictStatus(str, enum.Enum):
     FAILED = "FAILED"
 
 
-class MergeConflictMemory(BaseModel):
+class MergeConflictConflictingMemory(BaseModel):
     """
     Represents a memory involved in a merge conflict.
     """
@@ -88,7 +88,7 @@ class MergeConflictModel(BaseModel):
     project_user_session_id: str = Field(..., description="Session ID where the conflict occurred.")
     new_memory_content: Optional[str] = Field(None, description="New memory content that caused the conflict (for unresolved conflicts).")
     new_memories: Optional[List[MergeConflictNewMemory]] = Field(None, description="New memories created from resolution (for resolved conflicts).")
-    conflicting_memories: List[MergeConflictMemory] = Field(..., description="Existing memories that conflict.")
+    conflicting_memories: List[MergeConflictConflictingMemory] = Field(..., description="Existing memories that conflict.")
     clarifying_questions: List[MergeConflictQuestion] = Field(..., description="Questions to resolve the conflict.")
     status: MergeConflictStatus = Field(..., description="Current status of the conflict.")
     resolution_data: Optional[Dict[str, Any]] = Field(None, description="Resolution data if resolved.")
@@ -123,7 +123,7 @@ class MergeConflictModel(BaseModel):
                 MergeConflictNewMemory(**memory) for memory in conflict_data["new_memories"]
             ] if conflict_data.get("new_memories") else None,
             conflicting_memories=[
-                MergeConflictMemory(**memory) for memory in conflict_data["conflicting_memories"]
+                MergeConflictConflictingMemory(**memory) for memory in conflict_data["conflicting_memories"]
             ],
             clarifying_questions=[
                 MergeConflictQuestion(**question) for question in conflict_data["clarifying_questions"]
