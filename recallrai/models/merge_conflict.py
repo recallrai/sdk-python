@@ -28,8 +28,12 @@ class MergeConflictMemory(BaseModel):
     """
     Represents a memory involved in a merge conflict.
     """
+    memory_id: str = Field(..., description="Unique identifier for the memory.")
     content: str = Field(..., description="Content of the conflicting memory.")
     reason: str = Field(..., description="Reason why this memory conflicts.")
+    event_date_start: datetime = Field(..., description="When the event described in the memory started.")
+    event_date_end: datetime = Field(..., description="When the event described in the memory ended.")
+    created_at: datetime = Field(..., description="When this memory was created.")
 
     class Config:
         """Pydantic configuration."""
@@ -61,13 +65,29 @@ class MergeConflictAnswer(BaseModel):
         frozen = True
 
 
+class MergeConflictNewMemory(BaseModel):
+    """
+    Represents a new memory created from resolving a merge conflict.
+    """
+    memory_id: str = Field(..., description="Unique identifier for the new memory.")
+    content: str = Field(..., description="Content of the new memory.")
+    event_date_start: datetime = Field(..., description="When the event described in the memory started.")
+    event_date_end: datetime = Field(..., description="When the event described in the memory ended.")
+    created_at: datetime = Field(..., description="When this memory was created.")
+
+    class Config:
+        """Pydantic configuration."""
+        frozen = True
+
+
 class MergeConflictModel(BaseModel):
     """
     Represents a merge conflict in the RecallrAI system.
     """
     id: str = Field(..., description="Unique identifier for the merge conflict.")
     project_user_session_id: str = Field(..., description="Session ID where the conflict occurred.")
-    new_memory_content: str = Field(..., description="New memory content that caused the conflict.")
+    new_memory_content: Optional[str] = Field(None, description="New memory content that caused the conflict (for unresolved conflicts).")
+    new_memories: Optional[List[MergeConflictNewMemory]] = Field(None, description="New memories created from resolution (for resolved conflicts).")
     conflicting_memories: List[MergeConflictMemory] = Field(..., description="Existing memories that conflict.")
     clarifying_questions: List[MergeConflictQuestion] = Field(..., description="Questions to resolve the conflict.")
     status: MergeConflictStatus = Field(..., description="Current status of the conflict.")
@@ -98,7 +118,10 @@ class MergeConflictModel(BaseModel):
         return cls(
             id=conflict_data["id"],
             project_user_session_id=conflict_data["project_user_session_id"],
-            new_memory_content=conflict_data["new_memory_content"],
+            new_memory_content=conflict_data.get("new_memory_content"),
+            new_memories=[
+                MergeConflictNewMemory(**memory) for memory in conflict_data["new_memories"]
+            ] if conflict_data.get("new_memories") else None,
             conflicting_memories=[
                 MergeConflictMemory(**memory) for memory in conflict_data["conflicting_memories"]
             ],

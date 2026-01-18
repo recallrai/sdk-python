@@ -26,6 +26,7 @@ from .merge_conflict import (
     MergeConflictList, 
     MergeConflictStatus,
     MergeConflictMemory,
+    MergeConflictNewMemory,
     MergeConflictQuestion,
     MergeConflictAnswer,
 )
@@ -52,6 +53,7 @@ __all__ = [
     "MergeConflictList",
     "MergeConflictStatus",
     "MergeConflictMemory",
+    "MergeConflictNewMemory",
     "MergeConflictQuestion",
     "MergeConflictAnswer",
 ]
