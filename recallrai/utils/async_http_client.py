@@ -2,6 +2,7 @@
 Async HTTP client for making requests to the RecallrAI API.
 """
 
+import asyncio
 from json import JSONDecodeError
 from httpx import Response, AsyncClient, TimeoutException, ConnectError, Limits
 from typing import Any, Dict, Optional
@@ -43,10 +44,11 @@ class AsyncHTTPClient:
     async def __aenter__(self):
         """Async context manager entry."""
         # Configure connection limits to handle concurrent requests better
-        # Default httpx limits can cause connection errors under high concurrency
+        # Increase limits significantly to prevent connection pool exhaustion
+        # when multiple clients are running in parallel
         limits = Limits(
-            max_connections=100,  # Maximum total connections
-            max_keepalive_connections=20,  # Maximum idle connections to keep alive
+            max_connections=500,  # Maximum total connections (increased for high parallelism)
+            max_keepalive_connections=100,  # Maximum idle connections to keep alive
         )
         
         self._client = AsyncClient(
@@ -72,8 +74,8 @@ class AsyncHTTPClient:
         if self._client is None:
             # Configure connection limits to handle concurrent requests better
             limits = Limits(
-                max_connections=100,
-                max_keepalive_connections=20,
+                max_connections=500,
+                max_keepalive_connections=100,
             )
             
             self._client = AsyncClient(

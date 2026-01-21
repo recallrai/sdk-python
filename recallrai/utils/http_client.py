@@ -40,8 +40,8 @@ class HTTPClient:
         
         # Configure connection limits to handle concurrent requests better
         limits = Limits(
-            max_connections=100,
-            max_keepalive_connections=20,
+            max_connections=500,
+            max_keepalive_connections=100,
         )
         
         self.client = Client(
