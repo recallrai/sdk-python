@@ -3,7 +3,7 @@ HTTP client for making requests to the RecallrAI API.
 """
 
 from json import JSONDecodeError
-from httpx import Response, Client, TimeoutException, ConnectError
+from httpx import Response, Client, TimeoutException, ConnectError, Limits
 from typing import Any, Dict, Optional
 from ..exceptions import (
     TimeoutError, 
@@ -37,8 +37,16 @@ class HTTPClient:
         self.project_id = project_id
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
+        
+        # Configure connection limits to handle concurrent requests better
+        limits = Limits(
+            max_connections=100,
+            max_keepalive_connections=20,
+        )
+        
         self.client = Client(
             timeout=self.timeout,
+            limits=limits,
             headers={
                 "X-Recallr-Api-Key": self.api_key,
                 "X-Recallr-Project-Id": self.project_id,
