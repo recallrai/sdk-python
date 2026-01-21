@@ -283,7 +283,7 @@ try:
     # Available recall strategies:
     # - RecallStrategy.LOW_LATENCY: Fast retrieval with basic relevance
     # - RecallStrategy.BALANCED: Good balance of speed and quality (default)
-    # - RecallStrategy.DEEP: More thorough but slower memory search
+    # - RecallStrategy.AGENTIC: Agentic exploration for complex queries
     
     # Parameters:
     # - min_top_k: Minimum number of memories to return (default: 15, range: 5-50)
