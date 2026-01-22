@@ -107,6 +107,12 @@ class HTTPClient:
                     message=detail,
                     http_status=response.status_code
                 )
+            elif response.status_code == 404:
+                detail = "Resource not found"
+                raise ConnectionError(
+                    message=detail,
+                    http_status=response.status_code
+                )
             elif response.status_code == 401:
                 detail = "Authentication failed"
                 raise AuthenticationError(
