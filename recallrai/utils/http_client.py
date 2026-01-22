@@ -3,8 +3,8 @@ HTTP client for making requests to the RecallrAI API.
 """
 
 from json import JSONDecodeError
-from httpx import Response, Client, TimeoutException, ConnectError, Limits
 from typing import Any, Dict, Optional
+from httpx import Response, Client, TimeoutException, ConnectError, Limits
 from ..exceptions import (
     TimeoutError, 
     ConnectionError,
@@ -96,24 +96,30 @@ class HTTPClient:
                 return response  # No content to parse
             
             elif response.status_code == 422:
-                detail = response.json().get("detail", "Validation error")
+                detail = "Validation error"
                 raise ValidationError(
                     message=detail,
                     http_status=response.status_code
                 )
             elif response.status_code == 500:
-                detail = response.json().get("detail", "Internal server error")
+                detail = "Internal server error"
                 raise InternalServerError(
                     message=detail,
                     http_status=response.status_code
                 )
             elif response.status_code == 401:
-                detail = response.json().get("detail", "Authentication failed")
+                detail = "Authentication failed"
                 raise AuthenticationError(
                     message=detail,
                     http_status=response.status_code
                 )
-            
+            elif response.status_code == 429:
+                detail = "Too many requests"
+                raise ConnectionError(
+                    message=detail,
+                    http_status=response.status_code
+                )
+
             # Try to parse to JSON to catch JSON errors early
             _ = response.json()
             
