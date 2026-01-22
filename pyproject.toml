@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "recallrai"
-version = "0.5.6"
+version = "0.5.7"
 description = "Official Python SDK for RecallrAI - Revolutionary contextual memory system that enables AI assistants to form meaningful connections between conversations, just like human memory."
 authors = ["Devasheesh Mishra <devasheesh@recallrai.com>"]
 license = "MIT License"
