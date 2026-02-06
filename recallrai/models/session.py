@@ -170,6 +170,7 @@ class RecallStrategy(str, enum.Enum):
     LOW_LATENCY = "low_latency"
     BALANCED = "balanced"
     AGENTIC = "agentic"
+    AUTO = "auto"
 
 class Context(BaseModel):
     """
