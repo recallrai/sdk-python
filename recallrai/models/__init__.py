@@ -13,17 +13,18 @@ from .user import (
     MemoryRelationship,
 )
 from .session import (
-    SessionModel, 
-    SessionList, 
-    SessionMessagesList, 
-    MessageRole, 
-    SessionStatus, 
-    Context, 
+    SessionModel,
+    SessionList,
+    SessionMessagesList,
+    MessageRole,
+    SessionStatus,
+    Context,
+    ContextEvent,
     RecallStrategy,
 )
 from .merge_conflict import (
-    MergeConflictModel, 
-    MergeConflictList, 
+    MergeConflictModel,
+    MergeConflictList,
     MergeConflictStatus,
     MergeConflictConflictingMemory,
     MergeConflictNewMemory,
@@ -47,6 +48,7 @@ __all__ = [
     "MessageRole",
     "SessionStatus",
     "Context",
+    "ContextEvent",
     "RecallStrategy",
 
     "MergeConflictModel",

@@ -3,7 +3,7 @@ HTTP client for making requests to the RecallrAI API.
 """
 
 from json import JSONDecodeError
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterator, Optional
 from httpx import Response, Client, TimeoutException, ConnectError, Limits
 from ..exceptions import (
     TimeoutError, 
@@ -159,3 +159,41 @@ class HTTPClient:
     def delete(self, path: str) -> Response:
         """Make a DELETE request."""
         return self.request("DELETE", path)
+
+    def stream(self, path: str, params: Optional[Dict[str, Any]] = None) -> Iterator[str]:
+        """Stream Server-Sent Events (SSE) from the API.
+
+        Args:
+            path: API endpoint path.
+            params: Query parameters.
+
+        Yields:
+            Raw SSE lines as strings.
+        """
+        url = f"{self.base_url}{path}"
+
+        if params:
+            params = {k: v for k, v in params.items() if v is not None}
+
+        with self.client.stream(
+            method="GET",
+            url=url,
+            params=params,
+            headers={"Accept": "text/event-stream"},
+        ) as response:
+            if response.status_code == 422:
+                raise ValidationError(message="Validation error", http_status=response.status_code)
+            if response.status_code == 500:
+                raise InternalServerError(message="Internal server error", http_status=response.status_code)
+            if response.status_code == 404:
+                raise ConnectionError(message="Resource not found", http_status=response.status_code)
+            if response.status_code == 401:
+                raise AuthenticationError(message="Authentication failed", http_status=response.status_code)
+            if response.status_code == 429:
+                raise ConnectionError(message="Too many requests", http_status=response.status_code)
+            if response.status_code != 200:
+                raise ConnectionError(message="Unexpected response from server", http_status=response.status_code)
+
+            for line in response.iter_lines():
+                if line:
+                    yield line

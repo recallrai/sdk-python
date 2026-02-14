@@ -2,10 +2,12 @@
 Async session management functionality for the RecallrAI SDK.
 """
 
-from typing import Optional, Dict, Any
+import json
+from typing import AsyncIterator, Optional, Dict, Any
 from .utils.async_http_client import AsyncHTTPClient
 from .models import (
     Context,
+    ContextEvent,
     SessionMessagesList,
     SessionModel,
     SessionStatus,
@@ -170,6 +172,63 @@ class AsyncSession:
         elif self.status == SessionStatus.PROCESSING:
             logger.warning("You are trying to get context for a processing session. Why do you need it?")
         return Context.from_api_response(response.json())
+
+    async def get_context_stream(
+        self,
+        recall_strategy: RecallStrategy = RecallStrategy.BALANCED,
+        min_top_k: int = 15,
+        max_top_k: int = 50,
+        memories_threshold: float = 0.6,
+        summaries_threshold: float = 0.5,
+        last_n_messages: Optional[int] = None,
+        last_n_summaries: Optional[int] = None,
+        timezone: Optional[str] = None,
+        include_system_prompt: bool = True,
+    ) -> AsyncIterator[ContextEvent]:
+        """
+        Stream context events for this session using Server-Sent Events (SSE).
+
+        Args:
+            recall_strategy: The type of recall strategy to use.
+            min_top_k: Minimum number of memories to return.
+            max_top_k: Maximum number of memories to return.
+            memories_threshold: Similarity threshold for memories.
+            summaries_threshold: Similarity threshold for summaries.
+            last_n_messages: Number of last messages to include in context.
+            last_n_summaries: Number of last summaries to include in context.
+            timezone: Optional timezone string for formatting timestamps (e.g., 'America/New_York'). Defaults to UTC.
+            include_system_prompt: Whether to include the default system prompt of Recallr AI. Defaults to True.
+
+        Yields:
+            Streaming ContextEvent objects with status updates and final context.
+        """
+        params = {
+            "recall_strategy": recall_strategy.value,
+            "min_top_k": min_top_k,
+            "max_top_k": max_top_k,
+            "memories_threshold": memories_threshold,
+            "summaries_threshold": summaries_threshold,
+            "include_system_prompt": include_system_prompt,
+            "stream": True,
+        }
+        if last_n_messages is not None:
+            params["last_n_messages"] = last_n_messages
+        if last_n_summaries is not None:
+            params["last_n_summaries"] = last_n_summaries
+        if timezone is not None:
+            params["timezone"] = timezone
+
+        async for line in self._http.stream(
+            f"/api/v1/users/{self._user_id}/sessions/{self.session_id}/context",
+            params=params,
+        ):
+            if not line.startswith("data:"):
+                continue
+            payload = line[len("data:"):].strip()
+            if not payload:
+                continue
+            data = json.loads(payload)
+            yield ContextEvent.from_api_response(data)
 
     async def update(self, new_metadata: Optional[Dict[str, Any]] = None) -> None:
         """

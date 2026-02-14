@@ -300,6 +300,32 @@ except SessionNotFoundError as e:
     print(f"Error: {e}")
 ```
 
+### Session – Streaming Context
+
+```python
+from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
+from recallrai.models import RecallStrategy
+
+try:
+    for event in session.get_context_stream(
+        recall_strategy=RecallStrategy.BALANCED,
+        timezone="America/Los_Angeles",
+    ):
+        if event.status_update_message:
+            print("Status:", event.status_update_message)
+        if event.metadata:
+            print("Metadata:", event.metadata)
+        if event.is_final:
+            if event.error_message:
+                print("Error:", event.error_message)
+            else:
+                print("Final context:", event.context)
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except SessionNotFoundError as e:
+    print(f"Error: {e}")
+```
+
 ### Session – Process Session
 
 ```python

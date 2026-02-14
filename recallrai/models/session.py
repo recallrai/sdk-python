@@ -4,7 +4,7 @@ Session-related data models for the RecallrAI SDK.
 
 import enum
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 from ..utils import HTTPClient
 if TYPE_CHECKING:
@@ -195,4 +195,38 @@ class Context(BaseModel):
         """
         return cls(
             context=data["context"],
+        )
+
+
+class ContextEvent(BaseModel):
+    """
+    Represents a streaming context event for a session.
+    """
+    is_final: bool = Field(..., description="Whether this event is the final response.")
+    status_update_message: Optional[str] = Field(None, description="Human-readable status update.")
+    error_message: Optional[str] = Field(None, description="Error message, if any.")
+    context: Optional[str] = Field(None, description="Final context when is_final is True.")
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Structured metadata for UI rendering.")
+
+    class Config:
+        """Pydantic configuration."""
+        frozen = True
+
+    @classmethod
+    def from_api_response(cls, data: Dict[str, Any]) -> "ContextEvent":
+        """
+        Create a ContextEvent instance from a streaming API response.
+
+        Args:
+            data: Streaming event payload.
+
+        Returns:
+            A ContextEvent instance.
+        """
+        return cls(
+            is_final=data.get("is_final", False),
+            status_update_message=data.get("status_update_message"),
+            error_message=data.get("error_message"),
+            context=data.get("context"),
+            metadata=data.get("metadata"),
         )
