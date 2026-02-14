@@ -6,8 +6,7 @@ import json
 from typing import Iterator, Optional, Dict, Any
 from .utils import HTTPClient
 from .models import (
-    Context,
-    ContextEvent,
+    ContextResponse,
     SessionMessagesList,
     SessionModel,
     SessionStatus,
@@ -97,7 +96,7 @@ class Session:
             )
 
     def get_context(
-        self, 
+        self,
         recall_strategy: RecallStrategy = RecallStrategy.BALANCED, 
         min_top_k: int = 15,
         max_top_k: int = 50, 
@@ -106,8 +105,9 @@ class Session:
         last_n_messages: Optional[int] = None, 
         last_n_summaries: Optional[int] = None,
         timezone: Optional[str] = None,
-        include_system_prompt: bool = True
-    ) -> Context:
+        include_system_prompt: bool = True,
+        include_metadata_ids: bool = False
+    ) -> ContextResponse:
         """
         Get the current context for this session.
 
@@ -121,9 +121,10 @@ class Session:
             last_n_summaries: Number of last summaries to include in context.
             timezone: Optional timezone string for formatting timestamps (e.g., 'America/New_York'). Defaults to UTC.
             include_system_prompt: Whether to include the default system prompt of Recallr AI. Defaults to True.
+            include_metadata_ids: Whether to include memory IDs and session IDs that contributed to the context. Defaults to False.
 
         Returns:
-            Context information with the memory text and whether memory was used.
+            ContextResponse with the context and optional metadata.
 
         Raises:
             UserNotFoundError: If the user is not found.
@@ -141,6 +142,7 @@ class Session:
             "memories_threshold": memories_threshold,
             "summaries_threshold": summaries_threshold,
             "include_system_prompt": include_system_prompt,
+            "include_metadata_ids": include_metadata_ids,
         }
         if last_n_messages is not None:
             params["last_n_messages"] = last_n_messages
@@ -170,7 +172,7 @@ class Session:
             logger.warning("You are trying to get context for a processed session. Why do you need it?")
         elif self.status == SessionStatus.PROCESSING:
             logger.warning("You are trying to get context for a processing session. Why do you need it?")
-        return Context.from_api_response(response.json())
+        return ContextResponse.from_api_response(response.json())
 
     def get_context_stream(
         self,
@@ -183,7 +185,8 @@ class Session:
         last_n_summaries: Optional[int] = None,
         timezone: Optional[str] = None,
         include_system_prompt: bool = True,
-    ) -> Iterator[ContextEvent]:
+        include_metadata_ids: bool = False
+    ) -> Iterator[ContextResponse]:
         """
         Stream context events for this session using Server-Sent Events (SSE).
 
@@ -197,9 +200,10 @@ class Session:
             last_n_summaries: Number of last summaries to include in context.
             timezone: Optional timezone string for formatting timestamps (e.g., 'America/New_York'). Defaults to UTC.
             include_system_prompt: Whether to include the default system prompt of Recallr AI. Defaults to True.
+            include_metadata_ids: Whether to include memory IDs and session IDs that contributed to the context. Defaults to False.
 
         Yields:
-            Streaming ContextEvent objects with status updates and final context.
+            Streaming ContextResponse objects with status updates and final context.
         """
         params = {
             "recall_strategy": recall_strategy.value,
@@ -209,6 +213,7 @@ class Session:
             "summaries_threshold": summaries_threshold,
             "include_system_prompt": include_system_prompt,
             "stream": True,
+            "include_metadata_ids": include_metadata_ids,
         }
         if last_n_messages is not None:
             params["last_n_messages"] = last_n_messages
@@ -227,7 +232,7 @@ class Session:
             if not payload:
                 continue
             data = json.loads(payload)
-            yield ContextEvent.from_api_response(data)
+            yield ContextResponse.from_api_response(data)
 
     def update(self, new_metadata: Optional[Dict[str, Any]] = None) -> None:
         """

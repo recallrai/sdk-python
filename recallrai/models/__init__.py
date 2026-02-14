@@ -16,10 +16,11 @@ from .session import (
     SessionModel,
     SessionList,
     SessionMessagesList,
+    Message,
     MessageRole,
     SessionStatus,
-    Context,
-    ContextEvent,
+    ContextResponse,
+    ContextMetadata,
     RecallStrategy,
 )
 from .merge_conflict import (
@@ -45,10 +46,11 @@ __all__ = [
     "SessionModel",
     "SessionList",
     "SessionMessagesList",
+    "Message",
     "MessageRole",
     "SessionStatus",
-    "Context",
-    "ContextEvent",
+    "ContextResponse",
+    "ContextMetadata",
     "RecallStrategy",
 
     "MergeConflictModel",

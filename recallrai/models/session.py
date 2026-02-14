@@ -172,61 +172,57 @@ class RecallStrategy(str, enum.Enum):
     AGENTIC = "agentic"
     AUTO = "auto"
 
-class Context(BaseModel):
+class ContextMetadata(BaseModel):
     """
-    Represents the context for a session.
+    Metadata for context generation, including IDs of memories and sessions that contributed.
     """
-    context: str = Field(..., description="The context for the session.")
+    memory_ids: Optional[List[str]] = Field(default_factory=list, description="IDs of memories that contributed to the context.")
+    session_ids: Optional[List[str]] = Field(default_factory=list, description="IDs of sessions that contributed to the context.")
+    agent_reasoning: Optional[str] = Field(None, description="Agent's reasoning process. Only populated for agentic recall strategy.")
+
+    class Config:
+        """Pydantic configuration."""
+        frozen = True
+
+class ContextResponse(BaseModel):
+    """
+    Represents a context response from the API.
+    This model is used for both streaming and non-streaming responses.
+    """
+    is_final: bool = Field(..., description="Whether this is the final response.")
+    status_update_message: Optional[str] = Field(None, description="Human-readable status update for streaming.")
+    error_message: Optional[str] = Field(None, description="Error message, if any.")
+    context: Optional[str] = Field(None, description="Final context when is_final is True.")
+    metadata: Optional[ContextMetadata] = Field(None, description="Metadata including memory and session IDs.")
 
     class Config:
         """Pydantic configuration."""
         frozen = True
 
     @classmethod
-    def from_api_response(cls, data: Dict[str, Any]) -> "Context":
+    def from_api_response(cls, data: Dict[str, Any]) -> "ContextResponse":
         """
-        Create a Context instance from an API response.
+        Create a ContextResponse instance from an API response.
 
         Args:
             data: API response data.
 
         Returns:
-            A Context instance.
+            A ContextResponse instance.
         """
-        return cls(
-            context=data["context"],
-        )
-
-
-class ContextEvent(BaseModel):
-    """
-    Represents a streaming context event for a session.
-    """
-    is_final: bool = Field(..., description="Whether this event is the final response.")
-    status_update_message: Optional[str] = Field(None, description="Human-readable status update.")
-    error_message: Optional[str] = Field(None, description="Error message, if any.")
-    context: Optional[str] = Field(None, description="Final context when is_final is True.")
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Structured metadata for UI rendering.")
-
-    class Config:
-        """Pydantic configuration."""
-        frozen = True
-
-    @classmethod
-    def from_api_response(cls, data: Dict[str, Any]) -> "ContextEvent":
-        """
-        Create a ContextEvent instance from a streaming API response.
-
-        Args:
-            data: Streaming event payload.
-
-        Returns:
-            A ContextEvent instance.
-        """
+        metadata_data = data.get("metadata")
+        metadata = None
+        if metadata_data:
+            metadata = ContextMetadata(
+                memory_ids=metadata_data.get("memory_ids", []),
+                session_ids=metadata_data.get("session_ids", []),
+                agent_reasoning=metadata_data.get("agent_reasoning")
+            )
+        
         return cls(
             is_final=data.get("is_final", False),
             status_update_message=data.get("status_update_message"),
             error_message=data.get("error_message"),
             context=data.get("context"),
-            metadata=data.get("metadata"),
+            metadata=metadata,
         )
