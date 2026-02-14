@@ -279,6 +279,17 @@ try:
         timezone="America/Los_Angeles"  # Optional: timezone for timestamp formatting, None for UTC
     )
     print("Context:", context.context)
+
+    # Get context with metadata details
+    context = session.get_context(include_metadata_ids=True)
+    if context.metadata:
+        print("Memory IDs:", context.metadata.memory_ids)
+        print("Session IDs:", context.metadata.session_ids)
+        print("Vector Queries:", context.metadata.vector_search_queries)
+        print("Keywords:", context.metadata.keywords)
+        print("Summary Queries:", context.metadata.session_summaries_search_queries)
+        print("Date Filters:", context.metadata.date_range_filters)
+        print("Agent Reasoning:", context.metadata.agent_reasoning)
     
     # Available recall strategies:
     # - RecallStrategy.LOW_LATENCY: Fast retrieval with basic relevance

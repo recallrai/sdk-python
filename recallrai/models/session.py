@@ -172,13 +172,32 @@ class RecallStrategy(str, enum.Enum):
     AGENTIC = "agentic"
     AUTO = "auto"
 
+class DateRangeFilterType(str, enum.Enum):
+    """
+    Type of date field to filter on when querying memories.
+    """
+    EVENT_DATE = "event_date"
+    CREATED_AT = "created_at"
+
+class QueryDateRangeFilter(BaseModel):
+    """
+    Date range filter extracted from a user query.
+    """
+    filter_type: DateRangeFilterType = Field(..., description="Type of date filter (event_date or created_at).")
+    start_date: datetime = Field(..., description="Start of the date range (ISO 8601 timestamp).")
+    end_date: datetime = Field(..., description="End of the date range (ISO 8601 timestamp).")
+
 class ContextMetadata(BaseModel):
     """
     Metadata for context generation, including IDs of memories and sessions that contributed.
     """
-    memory_ids: Optional[List[str]] = Field(default_factory=list, description="IDs of memories that contributed to the context.")
-    session_ids: Optional[List[str]] = Field(default_factory=list, description="IDs of sessions that contributed to the context.")
+    memory_ids: Optional[List[str]] = Field(None, description="IDs of memories that contributed to the context.")
+    session_ids: Optional[List[str]] = Field(None, description="IDs of sessions that contributed to the context.")
     agent_reasoning: Optional[str] = Field(None, description="Agent's reasoning process. Only populated for agentic recall strategy.")
+    vector_search_queries: Optional[List[str]] = Field(None, description="Vector search queries generated for recall.")
+    keywords: Optional[List[str]] = Field(None, description="Keywords extracted for recall.")
+    session_summaries_search_queries: Optional[List[str]] = Field(None, description="Queries used to search session summaries.")
+    date_range_filters: Optional[List[QueryDateRangeFilter]] = Field(None, description="Date range filters extracted from the query.")
 
     class Config:
         """Pydantic configuration."""
@@ -214,9 +233,16 @@ class ContextResponse(BaseModel):
         metadata = None
         if metadata_data:
             metadata = ContextMetadata(
-                memory_ids=metadata_data.get("memory_ids", []),
-                session_ids=metadata_data.get("session_ids", []),
-                agent_reasoning=metadata_data.get("agent_reasoning")
+                memory_ids=metadata_data.get("memory_ids"),
+                session_ids=metadata_data.get("session_ids"),
+                agent_reasoning=metadata_data.get("agent_reasoning"),
+                vector_search_queries=metadata_data.get("vector_search_queries"),
+                keywords=metadata_data.get("keywords"),
+                session_summaries_search_queries=metadata_data.get("session_summaries_search_queries"),
+                date_range_filters=[
+                    QueryDateRangeFilter(**item)
+                    for item in metadata_data.get("date_range_filters", [])
+                ] if metadata_data.get("date_range_filters") else None,
             )
         
         return cls(

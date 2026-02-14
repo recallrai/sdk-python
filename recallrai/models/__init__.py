@@ -21,6 +21,8 @@ from .session import (
     SessionStatus,
     ContextResponse,
     ContextMetadata,
+    DateRangeFilterType,
+    QueryDateRangeFilter,
     RecallStrategy,
 )
 from .merge_conflict import (
@@ -51,6 +53,8 @@ __all__ = [
     "SessionStatus",
     "ContextResponse",
     "ContextMetadata",
+    "DateRangeFilterType",
+    "QueryDateRangeFilter",
     "RecallStrategy",
 
     "MergeConflictModel",
