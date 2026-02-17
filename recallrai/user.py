@@ -12,6 +12,7 @@ from .models import (
     SessionStatus,
     SessionList,
     UserMemoriesList,
+    UserMemoryItem,
     UserMessagesList,
     MergeConflictList,
     MergeConflictStatus,
@@ -382,6 +383,50 @@ class User:
             )
 
         return UserMemoriesList.from_api_response(response.json())
+
+    def get_memory(
+        self,
+        memory_id: str,
+        include_previous_versions: bool = True,
+        include_connected_memories: bool = True,
+    ) -> UserMemoryItem:
+        """
+        Retrieve a specific memory by ID.
+
+        Args:
+            memory_id: UUID of the memory to retrieve.
+            include_previous_versions: Include full version history (default: True).
+            include_connected_memories: Include connected memories (default: True).
+
+        Returns:
+            UserMemoryItem: Complete memory object.
+
+        Raises:
+            UserNotFoundError: If the user is not found.
+            RecallrAIError: If the memory is not found or another error occurs.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+        """
+        response = self._http.get(
+            f"/api/v1/users/{self.user_id}/memory/{memory_id}",
+            params={
+                "include_previous_versions": include_previous_versions,
+                "include_connected_memories": include_connected_memories,
+            },
+        )
+
+        if response.status_code == 404:
+            detail = response.json().get("detail", f"Memory {memory_id} not found")
+            raise RecallrAIError(message=detail, http_status=response.status_code)
+        elif response.status_code != 200:
+            raise RecallrAIError(
+                message=response.json().get('detail', 'Unknown error'),
+                http_status=response.status_code,
+            )
+
+        return UserMemoryItem(**response.json())
 
     def delete_memory(
         self,
