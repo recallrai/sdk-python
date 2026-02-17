@@ -156,9 +156,9 @@ class HTTPClient:
         """Make a PUT request."""
         return self.request("PUT", path, data=data)
 
-    def delete(self, path: str) -> Response:
+    def delete(self, path: str, params: Optional[Dict[str, Any]] = None) -> Response:
         """Make a DELETE request."""
-        return self.request("DELETE", path)
+        return self.request("DELETE", path, params=params)
 
     def stream(self, path: str, params: Optional[Dict[str, Any]] = None) -> Iterator[str]:
         """Stream Server-Sent Events (SSE) from the API.

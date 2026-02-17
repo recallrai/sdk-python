@@ -383,6 +383,42 @@ class User:
 
         return UserMemoriesList.from_api_response(response.json())
 
+    def delete_memory(
+        self,
+        memory_id: str,
+        delete_previous_versions: bool = False,
+    ) -> None:
+        """
+        Delete a memory (or its version history) for this user.
+
+        Args:
+            memory_id: UUID of the memory to delete (can be any version in the chain).
+            delete_previous_versions: If True, deletes the specified version and all
+                previous versions in the chain. If False (default), deletes only the
+                specified version.
+
+        Raises:
+            UserNotFoundError: If the user is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
+        """
+        response = self._http.delete(
+            f"/api/v1/users/{self.user_id}/memory/{memory_id}",
+            params={"delete_previous_versions": delete_previous_versions},
+        )
+
+        if response.status_code == 404:
+            detail = response.json().get("detail", f"Memory {memory_id} not found")
+            raise RecallrAIError(message=detail, http_status=response.status_code)
+        elif response.status_code != 204:
+            raise RecallrAIError(
+                message=response.json().get('detail', 'Unknown error'),
+                http_status=response.status_code,
+            )
+
     def list_merge_conflicts(
         self,
         offset: int = 0,

@@ -191,9 +191,9 @@ class AsyncHTTPClient:
         """Make an async PUT request."""
         return await self.request("PUT", path, data=data)
 
-    async def delete(self, path: str) -> Response:
+    async def delete(self, path: str, params: Optional[Dict[str, Any]] = None) -> Response:
         """Make an async DELETE request."""
-        return await self.request("DELETE", path)
+        return await self.request("DELETE", path, params=params)
 
     async def stream(self, path: str, params: Optional[Dict[str, Any]] = None) -> AsyncIterator[str]:
         """Stream Server-Sent Events (SSE) from the API.
