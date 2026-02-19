@@ -234,6 +234,38 @@ class Session:
             data = json.loads(payload)
             yield ContextResponse.from_api_response(data)
 
+    def delete(self) -> None:
+        """
+        Delete this session and all associated data.
+
+        Permanently deletes the session along with its messages and any memories,
+        memory connections, memory categories, and merge conflicts created from it.
+
+        Raises:
+            UserNotFoundError: If the user is not found.
+            SessionNotFoundError: If the session is not found.
+            AuthenticationError: If the API key or project ID is invalid.
+            InternalServerError: If the server encounters an error.
+            NetworkError: If there are network issues.
+            TimeoutError: If the request times out.
+            RecallrAIError: For other API-related errors.
+        """
+        response = self._http.delete(
+            f"/api/v1/users/{self._user_id}/sessions/{self.session_id}",
+        )
+
+        if response.status_code == 404:
+            detail = response.json().get('detail', '')
+            if f"User {self._user_id} not found" in detail:
+                raise UserNotFoundError(message=detail, http_status=response.status_code)
+            else:
+                raise SessionNotFoundError(message=detail, http_status=response.status_code)
+        elif response.status_code != 204:
+            raise RecallrAIError(
+                message=response.json().get('detail', 'Unknown error'),
+                http_status=response.status_code
+            )
+
     def update(self, new_metadata: Optional[Dict[str, Any]] = None) -> None:
         """
         Update the session's metadata.

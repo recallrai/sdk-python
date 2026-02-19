@@ -203,6 +203,21 @@ except SessionNotFoundError as e:
     print(f"Error: {e}")
 ```
 
+### Delete a Session
+
+```python
+from recallrai.exceptions import UserNotFoundError, SessionNotFoundError
+try:
+    user = client.get_user("user123")
+    session = user.get_session(session_id="session-uuid")
+    session.delete()
+    print("Session deleted successfully")
+except UserNotFoundError as e:
+    print(f"Error: {e}")
+except SessionNotFoundError as e:
+    print(f"Error: {e}")
+```
+
 ### List Sessions
 
 ```python
