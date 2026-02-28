@@ -11,6 +11,7 @@ from ..exceptions import (
     ValidationError,
     InternalServerError,
     AuthenticationError,
+    RateLimitError,
 )
 
 class HTTPClient:
@@ -120,8 +121,8 @@ class HTTPClient:
                     http_status=response.status_code
                 )
             elif response.status_code == 429:
-                detail = "Too many requests"
-                raise ConnectionError(
+                detail = response.json().get("detail", "Please try again in a few moments.")
+                raise RateLimitError(
                     message=detail,
                     http_status=response.status_code
                 )
@@ -190,7 +191,7 @@ class HTTPClient:
             if response.status_code == 401:
                 raise AuthenticationError(message="Authentication failed", http_status=response.status_code)
             if response.status_code == 429:
-                raise ConnectionError(message="Too many requests", http_status=response.status_code)
+                raise RateLimitError(message="Please try again in a few moments.", http_status=response.status_code)
             if response.status_code != 200:
                 raise ConnectionError(message="Unexpected response from server", http_status=response.status_code)
 
