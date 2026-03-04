@@ -2,6 +2,7 @@
 HTTP client for making requests to the RecallrAI API.
 """
 
+import time
 from json import JSONDecodeError
 from typing import Any, Dict, Iterator, Optional
 from httpx import Response, Client, TimeoutException, ConnectError, Limits
@@ -56,6 +57,22 @@ class HTTPClient:
                 "User-Agent": "RecallrAI-Python-SDK/0.5.8",
             },
         )
+        self._system_prompt_cache: Optional[str] = None
+        self._system_prompt_cache_expires_at: float = 0.0
+
+    def get_cached_system_prompt(self) -> str:
+        """Fetch the global system prompt, using a 1-hour in-memory cache to
+        avoid shipping the ~20 KB prompt on every request."""
+        now = time.monotonic()
+        if (
+            self._system_prompt_cache is not None
+            and now < self._system_prompt_cache_expires_at
+        ):
+            return self._system_prompt_cache  # type: ignore[return-value]
+        response = self.get("/api/v1/system-prompt")
+        self._system_prompt_cache = response.json()["system_prompt"]
+        self._system_prompt_cache_expires_at = now + 3600
+        return self._system_prompt_cache  # type: ignore[return-value]
 
     def request(
         self,

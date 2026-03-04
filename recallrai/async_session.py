@@ -136,13 +136,18 @@ class AsyncSession:
             TimeoutError: If the request times out.
             RecallrAIError: For other API-related errors.
         """
+        # Fetch and cache the system prompt client-side to avoid sending ~20 KB on every request
+        system_prompt_text: Optional[str] = None
+        if include_system_prompt:
+            system_prompt_text = await self._http.get_cached_system_prompt()
+
         params = {
             "recall_strategy": recall_strategy.value,
             "min_top_k": min_top_k,
             "max_top_k": max_top_k,
             "memories_threshold": memories_threshold,
             "summaries_threshold": summaries_threshold,
-            "include_system_prompt": include_system_prompt,
+            "include_system_prompt": False,
             "include_metadata_ids": include_metadata_ids,
         }
         if last_n_messages is not None:
@@ -173,7 +178,10 @@ class AsyncSession:
             logger.warning("You are trying to get context for a processed session. Why do you need it?")
         elif self.status == SessionStatus.PROCESSING:
             logger.warning("You are trying to get context for a processing session. Why do you need it?")
-        return ContextResponse.from_api_response(response.json())
+        result = ContextResponse.from_api_response(response.json())
+        if system_prompt_text is not None and result.context is not None:
+            result = result.model_copy(update={"context": system_prompt_text + "\n\n\n" + result.context})
+        return result
 
     async def get_context_stream(
         self,
@@ -206,13 +214,18 @@ class AsyncSession:
         Yields:
             Streaming ContextResponse objects with status updates and final context.
         """
+        # Fetch and cache the system prompt client-side to avoid sending ~20 KB on every request
+        system_prompt_text: Optional[str] = None
+        if include_system_prompt:
+            system_prompt_text = await self._http.get_cached_system_prompt()
+
         params = {
             "recall_strategy": recall_strategy.value,
             "min_top_k": min_top_k,
             "max_top_k": max_top_k,
             "memories_threshold": memories_threshold,
             "summaries_threshold": summaries_threshold,
-            "include_system_prompt": include_system_prompt,
+            "include_system_prompt": False,
             "include_metadata_ids": include_metadata_ids,
             "stream": True,
         }
@@ -233,7 +246,10 @@ class AsyncSession:
             if not payload:
                 continue
             data = json.loads(payload)
-            yield ContextResponse.from_api_response(data)
+            event = ContextResponse.from_api_response(data)
+            if system_prompt_text is not None and event.is_final and event.context is not None:
+                event = event.model_copy(update={"context": system_prompt_text + "\n\n\n" + event.context})
+            yield event
 
     async def update(self, new_metadata: Optional[Dict[str, Any]] = None) -> None:
         """
