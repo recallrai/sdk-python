@@ -52,7 +52,7 @@ class AsyncMergeConflict:
         # Expose key properties for easy access
         self.conflict_id = conflict_data.id
         self.status = conflict_data.status
-        self.new_memory_content = conflict_data.new_memory_content
+        self.proposed_memory_content = conflict_data.proposed_memory_content
         self.new_memories = conflict_data.new_memories
         self.conflicting_memories = conflict_data.conflicting_memories
         self.clarifying_questions = conflict_data.clarifying_questions

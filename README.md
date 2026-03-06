@@ -520,7 +520,7 @@ try:
     for conf in conflicts.conflicts:
         print(f"Conflict ID: {conf.conflict_id}")
         print(f"Status: {conf.status}")
-        print(f"New memory: {conf.new_memory_content}")
+        print(f"New memory: {conf.proposed_memory_content}")
         print(f"Conflicting memories: {len(conf.conflicting_memories)}")
         print(f"Questions: {len(conf.clarifying_questions)}")
         print(f"Created at: {conf.created_at}")
@@ -541,7 +541,7 @@ try:
     
     print(f"Conflict ID: {conflict.conflict_id}")
     print(f"Status: {conflict.status.value}")
-    print(f"New memory content: {conflict.new_memory_content}")
+    print(f"New memory content: {conflict.proposed_memory_content}")
     
     # Examine conflicting memories
     print("\nConflicting memories:")

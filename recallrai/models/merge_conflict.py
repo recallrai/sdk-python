@@ -86,7 +86,7 @@ class MergeConflictModel(BaseModel):
     """
     id: str = Field(..., description="Unique identifier for the merge conflict.")
     project_user_session_id: str = Field(..., description="Session ID where the conflict occurred.")
-    new_memory_content: Optional[str] = Field(None, description="New memory content that caused the conflict (for unresolved conflicts).")
+    proposed_memory_content: Optional[str] = Field(None, description="Proposed memory content that caused the conflict (for unresolved conflicts).")
     new_memories: Optional[List[MergeConflictNewMemory]] = Field(None, description="New memories created from resolution (for resolved conflicts).")
     conflicting_memories: List[MergeConflictConflictingMemory] = Field(..., description="Existing memories that conflict.")
     clarifying_questions: List[MergeConflictQuestion] = Field(..., description="Questions to resolve the conflict.")
@@ -118,7 +118,7 @@ class MergeConflictModel(BaseModel):
         return cls(
             id=conflict_data["id"],
             project_user_session_id=conflict_data["project_user_session_id"],
-            new_memory_content=conflict_data.get("new_memory_content"),
+            proposed_memory_content=conflict_data.get("proposed_memory_content"),
             new_memories=[
                 MergeConflictNewMemory(**memory) for memory in conflict_data["new_memories"]
             ] if conflict_data.get("new_memories") else None,
