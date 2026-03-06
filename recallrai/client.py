@@ -56,6 +56,7 @@ class RecallrAI:
         self, 
         user_id: str, 
         metadata: Optional[Dict[str, Any]] = None,
+        merge_conflict_enabled: Optional[bool] = None,
     ) -> User:
         """
         Create a new user.
@@ -63,6 +64,10 @@ class RecallrAI:
         Args:
             user_id: Unique identifier for the user.
             metadata: Optional metadata to associate with the user.
+            merge_conflict_enabled: Per-user merge conflict override.
+                True = always raise merge conflicts for this user.
+                False = never raise merge conflicts for this user.
+                None (default) = inherit the project-level setting.
 
         Returns:
             The created user object.
@@ -75,7 +80,10 @@ class RecallrAI:
             TimeoutError: If the request times out.
             RecallrAIError: For other API-related errors.
         """
-        response = self._http.post("/api/v1/users", data={"custom_user_id": user_id, "metadata": metadata or {}})
+        payload: Dict[str, Any] = {"custom_user_id": user_id, "metadata": metadata or {}}
+        if merge_conflict_enabled is not None:
+            payload["merge_conflict_enabled"] = merge_conflict_enabled
+        response = self._http.post("/api/v1/users", data=payload)
         if response.status_code == 409:
             detail = response.json().get("detail", f"User with ID {user_id} already exists")
             raise UserAlreadyExistsError(message=detail, http_status=response.status_code)

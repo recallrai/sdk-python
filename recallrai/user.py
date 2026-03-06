@@ -56,16 +56,21 @@ class User:
         self._user_data = user_data
         self.user_id = user_data.user_id
         self.metadata = user_data.metadata
+        self.merge_conflict_enabled = user_data.merge_conflict_enabled
         self.created_at = user_data.created_at
         self.last_active_at = user_data.last_active_at
 
-    def update(self, new_metadata: Optional[Dict[str, Any]] = None, new_user_id: Optional[str] = None) -> None:
+    def update(self, new_metadata: Optional[Dict[str, Any]] = None, new_user_id: Optional[str] = None, merge_conflict_enabled: Optional[bool] = None) -> None:
         """
         Update this user's metadata or ID.
 
         Args:
             new_metadata: New metadata to associate with the user.
             new_user_id: New ID for the user.
+            merge_conflict_enabled: Per-user merge conflict override.
+                True = always raise merge conflicts for this user.
+                False = never raise merge conflicts for this user.
+                None = inherit the project-level setting (pass explicitly to reset).
 
         Raises:
             UserNotFoundError: If the user is not found.
@@ -81,6 +86,8 @@ class User:
             data["new_metadata"] = new_metadata
         if new_user_id is not None:
             data["new_custom_user_id"] = new_user_id
+        if merge_conflict_enabled is not None:
+            data["merge_conflict_enabled"] = merge_conflict_enabled
             
         response = self._http.put(f"/api/v1/users/{self.user_id}", data=data)
         
@@ -102,6 +109,7 @@ class User:
         self._user_data = updated_data
         self.user_id = updated_data.user_id
         self.metadata = updated_data.metadata
+        self.merge_conflict_enabled = updated_data.merge_conflict_enabled
         self.last_active_at = updated_data.last_active_at
 
     def refresh(self) -> None:
@@ -133,6 +141,7 @@ class User:
         self._user_data = refreshed_data
         self.user_id = refreshed_data.user_id
         self.metadata = refreshed_data.metadata
+        self.merge_conflict_enabled = refreshed_data.merge_conflict_enabled
         self.created_at = refreshed_data.created_at
         self.last_active_at = refreshed_data.last_active_at
 

@@ -44,6 +44,7 @@ try:
     print(f"Created user: {user.user_id}")
     print(f"User metadata: {user.metadata}")
     print(f"Created at: {user.created_at}")
+    print(f"Merge conflict enabled: {user.merge_conflict_enabled}")  # None = inherit project setting
 except UserAlreadyExistsError as e:
     print(f"Error: {e}")
 ```
@@ -85,10 +86,12 @@ try:
     # update() mutates the instance; no value is returned
     user.update(
         new_metadata={"name": "John Doe", "role": "admin"},
-        new_user_id="john_doe"
+        new_user_id="john_doe",
+        merge_conflict_enabled=True  # override: always raise merge conflicts for this user
     )
     print(f"Updated user ID: {user.user_id}")
     print(f"Updated metadata: {user.metadata}")
+    print(f"Merge conflict enabled: {user.merge_conflict_enabled}")
     print(f"Last active: {user.last_active_at}")
 except UserNotFoundError as e:
     print(f"Error: {e}")

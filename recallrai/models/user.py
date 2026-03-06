@@ -16,6 +16,7 @@ class UserModel(BaseModel):
     
     user_id: str = Field(..., description="Unique identifier for the user.")
     metadata: Dict[str, Any] = Field(..., description="Custom metadata for the user.")
+    merge_conflict_enabled: Optional[bool] = Field(None, description="Per-user merge conflict override. True=always raise, False=never raise, None=inherit project setting.")
     created_at: datetime = Field(..., description="When the user was created.")
     last_active_at: datetime = Field(..., description="When the user was last active.")
 
@@ -44,7 +45,8 @@ class UserModel(BaseModel):
 
         return cls(
             user_id=user_data["custom_user_id"],
-            metadata=user_data.get("metadata", {}),
+            metadata=user_data["metadata"],
+            merge_conflict_enabled=user_data["merge_conflict_enabled"],
             created_at=user_data["created_at"],
             last_active_at=user_data["last_active_at"],
         )
