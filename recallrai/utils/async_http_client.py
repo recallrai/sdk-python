@@ -143,6 +143,7 @@ class AsyncHTTPClient:
                 url=url,
                 params=params,
                 json=data,
+                timeout=300,    # 5min
             )
             
             if response.status_code == 204:
