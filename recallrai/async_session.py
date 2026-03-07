@@ -174,10 +174,10 @@ class AsyncSession:
                 message=response.json().get('detail', 'Unknown error'),
                 http_status=response.status_code
             )
-        if self.status == SessionStatus.PROCESSED:
-            logger.warning("You are trying to get context for a processed session. Why do you need it?")
-        elif self.status == SessionStatus.PROCESSING:
-            logger.warning("You are trying to get context for a processing session. Why do you need it?")
+        # if self.status == SessionStatus.PROCESSED:
+        #     logger.warning("You are trying to get context for a processed session. Why do you need it?")
+        # elif self.status == SessionStatus.PROCESSING:
+        #     logger.warning("You are trying to get context for a processing session. Why do you need it?")
         result = ContextResponse.from_api_response(response.json())
         if system_prompt_text is not None and result.context is not None:
             result = result.model_copy(update={"context": system_prompt_text + "\n\n\n" + result.context})
