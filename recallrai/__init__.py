@@ -13,7 +13,7 @@ from .async_user import AsyncUser
 from .async_session import AsyncSession
 from .async_merge_conflict import AsyncMergeConflict
 
-__version__ = "0.6.3"
+__version__ = "0.6.4"
 
 __all__ = [
     "RecallrAI",

@@ -54,7 +54,7 @@ class HTTPClient:
                 "X-Recallr-Project-Id": self.project_id,
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "User-Agent": "RecallrAI-Python-SDK/0.6.3",
+                "User-Agent": "RecallrAI-Python-SDK/0.6.4",
             },
         )
         self._system_prompt_cache: Optional[str] = None
