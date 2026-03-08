@@ -138,7 +138,7 @@ class HTTPClient:
                     http_status=response.status_code
                 )
             elif response.status_code == 429:
-                detail = response.json().get("detail", "Please try again in a few moments.")
+                detail = "429 Too Many Requests. Please try again in a few moments."
                 raise RateLimitError(
                     message=detail,
                     http_status=response.status_code
@@ -152,12 +152,12 @@ class HTTPClient:
             raise TimeoutError(
                 message=f"Request timed out: {e}",
                 http_status=0  # No HTTP status for timeout
-            )
+            ) from e
         except (ConnectError, JSONDecodeError) as e:
             raise ConnectionError(
                 message=f"Failed to connect to the API: {e}",
                 http_status=0  # No HTTP status for connection error
-            )
+            ) from e
         except Exception as e:
             # Handle other exceptions as needed
             raise e
