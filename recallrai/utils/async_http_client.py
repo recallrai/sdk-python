@@ -160,7 +160,7 @@ class AsyncHTTPClient:
                     message=detail,
                     http_status=response.status_code
                 )
-            elif response.status_code == 404:
+            elif response.status_code == 404 and response.text == "404 page not found":
                 detail = "Resource not found"
                 raise ConnectionError(
                     message=detail,
@@ -240,14 +240,12 @@ class AsyncHTTPClient:
                 raise ValidationError(message="Validation error", http_status=response.status_code)
             if response.status_code == 500:
                 raise InternalServerError(message="Internal server error", http_status=response.status_code)
-            if response.status_code == 404:
+            if response.status_code == 404 and response.text == "404 page not found":
                 raise ConnectionError(message="Resource not found", http_status=response.status_code)
             if response.status_code == 401:
                 raise AuthenticationError(message="Authentication failed", http_status=response.status_code)
             if response.status_code == 429:
                 raise RateLimitError(message="Please try again in a few moments.", http_status=response.status_code)
-            if response.status_code != 200:
-                raise ConnectionError(message="Unexpected response from server", http_status=response.status_code)
 
             async for line in response.aiter_lines():
                 if line:
