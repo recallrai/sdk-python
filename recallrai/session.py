@@ -9,7 +9,6 @@ from .models import (
     ContextResponse,
     SessionMessagesList,
     SessionModel,
-    SessionStatus,
     MessageRole,
     RecallStrategy,
 )
@@ -97,12 +96,12 @@ class Session:
 
     def get_context(
         self,
-        recall_strategy: RecallStrategy = RecallStrategy.BALANCED, 
+        recall_strategy: RecallStrategy = RecallStrategy.BALANCED,
         min_top_k: int = 15,
-        max_top_k: int = 50, 
+        max_top_k: int = 50,
         memories_threshold: float = 0.6,
         summaries_threshold: float = 0.5,
-        last_n_messages: Optional[int] = None, 
+        last_n_messages: Optional[int] = None,
         last_n_summaries: Optional[int] = None,
         timezone: Optional[str] = None,
         include_system_prompt: bool = True,
