@@ -108,6 +108,7 @@ class UserList(BaseModel):
 class MemoryVersionInfo(BaseModel):
     """Information about a specific version of a memory."""
     
+    memory_id: str = Field(..., description="ID of this specific version (can be used to fetch/navigate to it)")
     version_number: int = Field(..., description="Version number (1 = oldest, N = current)")
     content: str = Field(..., description="Content of this version")
     event_date_start: datetime = Field(..., description="When the event started (actual event time)")
@@ -115,6 +116,7 @@ class MemoryVersionInfo(BaseModel):
     created_at: datetime = Field(..., description="When this version was created")
     expired_at: datetime = Field(..., description="When this version expired")
     expiration_reason: str = Field(..., description="Why this version expired (NewMemoryVersionCreationReason enum)")
+    merge_conflict_id: Optional[str] = Field(None, description="ID of the merge conflict that caused this version to be expired. Only set when expiration_reason is MERGE_CONFLICT and a conflict record exists.")
 
     class Config:
         frozen = True
@@ -156,6 +158,11 @@ class UserMemoryItem(BaseModel):
     
     # Merge conflict info
     merge_conflict_in_progress: bool = Field(..., description="Whether a merge conflict is in progress")
+    merge_conflict_id: Optional[str] = Field(None, description="ID of the merge conflict that caused this memory to be expired. Only set when expiration_reason is MERGE_CONFLICT and a conflict record exists.")
+    
+    # Optional expiration info (set when viewing an expired / previous version)
+    expired_at: Optional[datetime] = Field(None, description="When this version expired (only set for expired versions)")
+    expiration_reason: Optional[str] = Field(None, description="Why this version was superseded (only set for expired versions)")
     
     # Session info
     session_id: str = Field(..., description="Which session created this version")
