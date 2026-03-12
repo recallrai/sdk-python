@@ -57,22 +57,22 @@ class HTTPClient:
                 "User-Agent": "RecallrAI-Python-SDK/0.6.5",
             },
         )
-        self._system_prompt_cache: Optional[str] = None
-        self._system_prompt_cache_expires_at: float = 0.0
+        self._system_prompt_cache: Dict[str, str] = {}
+        self._system_prompt_cache_expires_at: Dict[str, float] = {}
 
-    def get_cached_system_prompt(self) -> str:
-        """Fetch the global system prompt, using a 1-hour in-memory cache to
-        avoid shipping the ~20 KB prompt on every request."""
+    def get_cached_system_prompt(self, recall_strategy_value: str) -> str:
+        """Fetch the strategy-specific system prompt, using a 1-hour in-memory
+        cache per strategy to avoid shipping the ~20 KB prompt on every request."""
         now = time.monotonic()
         if (
-            self._system_prompt_cache is not None
-            and now < self._system_prompt_cache_expires_at
+            self._system_prompt_cache.get(recall_strategy_value) is not None
+            and now < self._system_prompt_cache_expires_at.get(recall_strategy_value, 0.0)
         ):
-            return self._system_prompt_cache  # type: ignore[return-value]
-        response = self.get("/api/v1/system-prompt")
-        self._system_prompt_cache = response.json()["system_prompt"]
-        self._system_prompt_cache_expires_at = now + 3600
-        return self._system_prompt_cache  # type: ignore[return-value]
+            return self._system_prompt_cache[recall_strategy_value]
+        response = self.get("/api/v1/system-prompt", params={"recall_strategy": recall_strategy_value})
+        self._system_prompt_cache[recall_strategy_value] = response.json()["system_prompt"]
+        self._system_prompt_cache_expires_at[recall_strategy_value] = now + 3600
+        return self._system_prompt_cache[recall_strategy_value]
 
     def request(
         self,

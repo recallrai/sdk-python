@@ -198,6 +198,7 @@ class ContextMetadata(BaseModel):
     keywords: Optional[List[str]] = Field(None, description="Keywords extracted for recall.")
     session_summaries_search_queries: Optional[List[str]] = Field(None, description="Queries used to search session summaries.")
     date_range_filters: Optional[List[QueryDateRangeFilter]] = Field(None, description="Date range filters extracted from the query.")
+    recall_strategy_used: Optional[RecallStrategy] = Field(None, description="Actual recall strategy used. Differs from the requested strategy when auto is used.")
 
     class Config:
         """Pydantic configuration."""
@@ -243,6 +244,7 @@ class ContextResponse(BaseModel):
                     QueryDateRangeFilter(**item)
                     for item in metadata_data.get("date_range_filters", [])
                 ] if metadata_data.get("date_range_filters") else None,
+                recall_strategy_used=RecallStrategy(metadata_data["recall_strategy_used"]),
             )
         
         return cls(

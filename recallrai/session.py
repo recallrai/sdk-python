@@ -134,10 +134,17 @@ class Session:
             TimeoutError: If the request times out.
             RecallrAIError: For other API-related errors.
         """
-        # Fetch and cache the system prompt client-side to avoid sending ~20 KB on every request
-        system_prompt_text: Optional[str] = None
+        # Fetch and cache the strategy-specific system prompt client-side to avoid sending ~20 KB on every request
+        _structured_prompt: Optional[str] = None
+        _agentic_prompt: Optional[str] = None
         if include_system_prompt:
-            system_prompt_text = self._http.get_cached_system_prompt()
+            if recall_strategy == RecallStrategy.AUTO:
+                _structured_prompt = self._http.get_cached_system_prompt(RecallStrategy.LOW_LATENCY.value)
+                _agentic_prompt = self._http.get_cached_system_prompt(RecallStrategy.AGENTIC.value)
+            elif recall_strategy == RecallStrategy.AGENTIC:
+                _agentic_prompt = self._http.get_cached_system_prompt(RecallStrategy.AGENTIC.value)
+            else:
+                _structured_prompt = self._http.get_cached_system_prompt(recall_strategy.value)
 
         params = {
             "recall_strategy": recall_strategy.value,
@@ -177,8 +184,17 @@ class Session:
         # elif self.status == SessionStatus.PROCESSING:
         #     logger.warning("You are trying to get context for a processing session. Why do you need it?")
         result = ContextResponse.from_api_response(response.json())
-        if system_prompt_text is not None and result.context is not None:
-            result = result.model_copy(update={"context": system_prompt_text + "\n\n\n" + result.context})
+        if include_system_prompt and result.context is not None:
+            recall_strategy_used = result.metadata.recall_strategy_used if result.metadata else None
+            if recall_strategy_used:
+                if recall_strategy_used == RecallStrategy.AGENTIC:
+                    system_prompt_text = _agentic_prompt
+                elif recall_strategy_used in (RecallStrategy.LOW_LATENCY, RecallStrategy.BALANCED):
+                    system_prompt_text = _structured_prompt
+                else:
+                    system_prompt_text = _structured_prompt
+                if system_prompt_text is not None:
+                    result = result.model_copy(update={"context": system_prompt_text + "\n\n\n" + result.context})
         return result
 
     def get_context_stream(
@@ -212,10 +228,17 @@ class Session:
         Yields:
             Streaming ContextResponse objects with status updates and final context.
         """
-        # Fetch and cache the system prompt client-side to avoid sending ~20 KB on every request
-        system_prompt_text: Optional[str] = None
+        # Fetch and cache the strategy-specific system prompt client-side to avoid sending ~20 KB on every request
+        _structured_prompt: Optional[str] = None
+        _agentic_prompt: Optional[str] = None
         if include_system_prompt:
-            system_prompt_text = self._http.get_cached_system_prompt()
+            if recall_strategy == RecallStrategy.AUTO:
+                _structured_prompt = self._http.get_cached_system_prompt(RecallStrategy.LOW_LATENCY.value)
+                _agentic_prompt = self._http.get_cached_system_prompt(RecallStrategy.AGENTIC.value)
+            elif recall_strategy == RecallStrategy.AGENTIC:
+                _agentic_prompt = self._http.get_cached_system_prompt(RecallStrategy.AGENTIC.value)
+            else:
+                _structured_prompt = self._http.get_cached_system_prompt(recall_strategy.value)
 
         params = {
             "recall_strategy": recall_strategy.value,
@@ -245,8 +268,17 @@ class Session:
                 continue
             data = json.loads(payload)
             event = ContextResponse.from_api_response(data)
-            if system_prompt_text is not None and event.is_final and event.context is not None:
-                event = event.model_copy(update={"context": system_prompt_text + "\n\n\n" + event.context})
+            if include_system_prompt and event.is_final and event.context is not None:
+                recall_strategy_used = event.metadata.recall_strategy_used if event.metadata else None
+                if recall_strategy_used:
+                    if recall_strategy_used == RecallStrategy.AGENTIC:
+                        system_prompt_text = _agentic_prompt
+                    elif recall_strategy_used in (RecallStrategy.LOW_LATENCY, RecallStrategy.BALANCED):
+                        system_prompt_text = _structured_prompt
+                    else:
+                        system_prompt_text = _structured_prompt
+                    if system_prompt_text is not None:
+                        event = event.model_copy(update={"context": system_prompt_text + "\n\n\n" + event.context})
             yield event
 
     def delete(self) -> None:
