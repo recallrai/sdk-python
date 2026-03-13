@@ -76,7 +76,7 @@ class AsyncHTTPClient:
                 "X-Recallr-Project-Id": self.project_id,
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "User-Agent": "RecallrAI-Python-SDK/0.6.5",
+                "User-Agent": "RecallrAI-Python-SDK/0.6.6",
             },
         )
         return self
@@ -103,7 +103,7 @@ class AsyncHTTPClient:
                     "X-Recallr-Project-Id": self.project_id,
                     "Content-Type": "application/json",
                     "Accept": "application/json",
-                    "User-Agent": "RecallrAI-Python-SDK/0.6.5",
+                    "User-Agent": "RecallrAI-Python-SDK/0.6.6",
                 },
             )
 
