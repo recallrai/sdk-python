@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 from ..utils import HTTPClient
+from .unavailable import UNAVAILABLE, Unavailable
 if TYPE_CHECKING:
     from ..user import User
     from ..async_user import AsyncUser
@@ -15,10 +16,10 @@ class UserModel(BaseModel):
     """Represents a user in the RecallrAI system."""
     
     user_id: str = Field(..., description="Unique identifier for the user.")
-    metadata: Dict[str, Any] = Field(..., description="Custom metadata for the user.")
-    merge_conflict_enabled: Optional[bool] = Field(None, description="Per-user merge conflict override. True=always raise, False=never raise, None=inherit project setting.")
-    created_at: datetime = Field(..., description="When the user was created.")
-    last_active_at: datetime = Field(..., description="When the user was last active.")
+    metadata: Union[Dict[str, Any], Unavailable] = Field(..., description="Custom metadata for the user.")
+    merge_conflict_enabled: Union[Optional[bool], Unavailable] = Field(None, description="Per-user merge conflict override. True=always raise, False=never raise, None=inherit project setting.")
+    created_at: Union[datetime, Unavailable] = Field(..., description="When the user was created.")
+    last_active_at: Union[datetime, Unavailable] = Field(..., description="When the user was last active.")
 
     class Config:
         """Pydantic configuration."""
@@ -49,6 +50,21 @@ class UserModel(BaseModel):
             merge_conflict_enabled=user_data["merge_conflict_enabled"],
             created_at=user_data["created_at"],
             last_active_at=user_data["last_active_at"],
+        )
+
+    @classmethod
+    def from_reference(cls, user_id: str) -> "UserModel":
+        """
+        Create a lightweight user reference without an API lookup.
+
+        This is used when callers explicitly disable validation for trusted IDs.
+        """
+        return cls(
+            user_id=user_id,
+            metadata=UNAVAILABLE,
+            merge_conflict_enabled=UNAVAILABLE,
+            created_at=UNAVAILABLE,
+            last_active_at=UNAVAILABLE,
         )
 
 

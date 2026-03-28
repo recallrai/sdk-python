@@ -235,12 +235,14 @@ class AsyncUser:
         session_data = SessionModel.from_api_response(response.json())
         return AsyncSession(self._http, self.user_id, session_data)
 
-    async def get_session(self, session_id: str) -> AsyncSession:
+    async def get_session(self, session_id: str, validate: bool = True) -> AsyncSession:
         """
         Get an existing session for this user asynchronously.
 
         Args:
             session_id: ID of the session to retrieve.
+            validate: Whether to validate session existence via API before creating the instance.
+                Defaults to True. Set to False when session_id is trusted.
 
         Returns:
             An AsyncSession object to interact with the session.
@@ -254,6 +256,9 @@ class AsyncUser:
             TimeoutError: If the request times out.
             RecallrAIError: For other API-related errors.
         """
+        if not validate:
+            return AsyncSession(self._http, self.user_id, SessionModel.from_reference(session_id))
+
         # First, verify the session exists by fetching its details
         response = await self._http.get(f"/api/v1/users/{self.user_id}/sessions/{session_id}")
         

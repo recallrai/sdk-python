@@ -93,12 +93,14 @@ class RecallrAI:
         user_data = UserModel.from_api_response(response.json())
         return User(self._http, user_data)
 
-    def get_user(self, user_id: str) -> User:
+    def get_user(self, user_id: str, validate: bool = True) -> User:
         """
         Get a user by ID.
 
         Args:
             user_id: Unique identifier of the user.
+            validate: Whether to validate user existence via API before creating the instance.
+                Defaults to True. Set to False when user_id is trusted.
 
         Returns:
             A User object representing the user.
@@ -111,6 +113,9 @@ class RecallrAI:
             TimeoutError: If the request times out.
             RecallrAIError: For other API-related errors.
         """
+        if not validate:
+            return User(self._http, UserModel.from_reference(user_id))
+
         response = self._http.get(f"/api/v1/users/{user_id}")
         if response.status_code == 404:
             detail = response.json().get("detail", f"User with ID {user_id} not found")

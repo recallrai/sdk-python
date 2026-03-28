@@ -34,6 +34,10 @@ from .merge_conflict import (
     MergeConflictQuestion,
     MergeConflictAnswer,
 )
+from .unavailable import (
+    Unavailable,
+    UNAVAILABLE,
+)
 
 __all__ = [
     "UserModel",
@@ -64,4 +68,7 @@ __all__ = [
     "MergeConflictNewMemory",
     "MergeConflictQuestion",
     "MergeConflictAnswer",
+
+    "Unavailable",
+    "UNAVAILABLE",
 ]

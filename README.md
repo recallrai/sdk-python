@@ -61,6 +61,12 @@ except UserNotFoundError as e:
     print(f"Error: {e}")
 ```
 
+If `user_id` is already trusted, you can skip the lookup request:
+
+```python
+user = client.get_user("user123", validate=False)
+```
+
 ### List Users
 
 ```python
@@ -164,6 +170,33 @@ except UserNotFoundError as e:
 except SessionNotFoundError as e:
     print(f"Error: {e}")
 ```
+
+If `session_id` is trusted, you can skip this lookup request:
+
+```python
+session = user.get_session(session_id="session-uuid", validate=False)
+```
+
+### Trusted IDs – Skip Validation Lookups
+
+```python
+from recallrai.models import RecallStrategy
+
+# Skips GET /api/v1/users/{user_id}
+user = client.get_user("user123", validate=False)
+
+# Skips GET /api/v1/users/{user_id}/sessions/{session_id}
+session = user.get_session(session_id="session-uuid", validate=False)
+
+# Goes directly to context retrieval
+context = session.get_context(recall_strategy=RecallStrategy.LOW_LATENCY)
+print(context.context)
+```
+
+Use this only when IDs are already trusted by your system. This optimization skips SDK pre-validation calls.
+
+When `validate=False` is used, unknown reference fields are set to `UNAVAILABLE` until you call `refresh()`.
+Import it from `recallrai.models` when you need to check for this sentinel.
 
 ### Update a Session
 

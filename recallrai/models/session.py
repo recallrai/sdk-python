@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 from ..utils import HTTPClient
+from .unavailable import UNAVAILABLE, Unavailable
 if TYPE_CHECKING:
     from ..session import Session
     from ..async_session import AsyncSession
@@ -72,9 +73,9 @@ class SessionModel(BaseModel):
     Represents a conversation session.
     """
     session_id: str = Field(..., description="Unique identifier for the session.")
-    status: SessionStatus = Field(..., description="Current status of the session.")
-    created_at: datetime = Field(..., description="When the session was created.")
-    metadata: Dict[str, Any] = Field(default_factory=dict, description="Optional metadata for the session.")
+    status: Union[SessionStatus, Unavailable] = Field(..., description="Current status of the session.")
+    created_at: Union[datetime, Unavailable] = Field(..., description="When the session was created.")
+    metadata: Union[Dict[str, Any], Unavailable] = Field(default_factory=dict, description="Optional metadata for the session.")
 
     class Config:
         """Pydantic configuration."""
@@ -103,6 +104,20 @@ class SessionModel(BaseModel):
             status=session_data["status"],
             created_at=session_data["created_at"],
             metadata=session_data["metadata"],
+        )
+
+    @classmethod
+    def from_reference(cls, session_id: str) -> "SessionModel":
+        """
+        Create a lightweight session reference without an API lookup.
+
+        This is used when callers explicitly disable validation for trusted IDs.
+        """
+        return cls(
+            session_id=session_id,
+            status=UNAVAILABLE,
+            created_at=UNAVAILABLE,
+            metadata=UNAVAILABLE,
         )
 
 
