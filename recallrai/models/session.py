@@ -75,7 +75,9 @@ class SessionModel(BaseModel):
     session_id: str = Field(..., description="Unique identifier for the session.")
     status: Union[SessionStatus, Unavailable] = Field(..., description="Current status of the session.")
     created_at: Union[datetime, Unavailable] = Field(..., description="When the session was created.")
-    metadata: Union[Dict[str, Any], Unavailable] = Field(default_factory=dict, description="Optional metadata for the session.")
+    metadata: Union[Dict[str, Any], Unavailable] = Field(..., description="Optional metadata for the session.")
+    plan_used_id: Union[Optional[str], Unavailable] = Field(..., description="Resolved plan identifier used to process this session.")
+    plan_used_version: Union[Optional[str], Unavailable] = Field(..., description="Resolved plan version used to process this session.")
 
     class Config:
         """Pydantic configuration."""
@@ -104,6 +106,8 @@ class SessionModel(BaseModel):
             status=session_data["status"],
             created_at=session_data["created_at"],
             metadata=session_data["metadata"],
+            plan_used_id=session_data["plan_used_id"],
+            plan_used_version=session_data["plan_used_version"],
         )
 
     @classmethod
@@ -118,6 +122,8 @@ class SessionModel(BaseModel):
             status=UNAVAILABLE,
             created_at=UNAVAILABLE,
             metadata=UNAVAILABLE,
+            plan_used_id=UNAVAILABLE,
+            plan_used_version=UNAVAILABLE,
         )
 
 

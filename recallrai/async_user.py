@@ -57,11 +57,18 @@ class AsyncUser:
         self._user_data = user_data
         self.user_id = user_data.user_id
         self.metadata = user_data.metadata
+        self.plan_id = user_data.plan_id
         self.merge_conflict_enabled = user_data.merge_conflict_enabled
         self.created_at = user_data.created_at
         self.last_active_at = user_data.last_active_at
 
-    async def update(self, new_metadata: Optional[Dict[str, Any]] = None, new_user_id: Optional[str] = None, merge_conflict_enabled: Optional[bool] = None) -> None:
+    async def update(
+        self,
+        new_metadata: Optional[Dict[str, Any]] = None,
+        new_user_id: Optional[str] = None,
+        merge_conflict_enabled: Optional[bool] = None,
+        new_plan_id: Optional[str] = None,
+    ) -> None:
         """
         Update this user's metadata or ID asynchronously.
 
@@ -72,6 +79,7 @@ class AsyncUser:
                 True = always raise merge conflicts for this user.
                 False = never raise merge conflicts for this user.
                 None = inherit the project-level setting (pass explicitly to reset).
+            new_plan_id: New plan identifier to assign to this user.
 
         Raises:
             UserNotFoundError: If the user is not found.
@@ -89,6 +97,8 @@ class AsyncUser:
             data["new_custom_user_id"] = new_user_id
         if merge_conflict_enabled is not None:
             data["merge_conflict_enabled"] = merge_conflict_enabled
+        if new_plan_id is not None:
+            data["new_plan_id"] = new_plan_id
             
         response = await self._http.put(f"/api/v1/users/{self.user_id}", data=data)
         
@@ -110,6 +120,7 @@ class AsyncUser:
         self._user_data = updated_data
         self.user_id = updated_data.user_id
         self.metadata = updated_data.metadata
+        self.plan_id = updated_data.plan_id
         self.merge_conflict_enabled = updated_data.merge_conflict_enabled
         self.last_active_at = updated_data.last_active_at
 
@@ -142,6 +153,7 @@ class AsyncUser:
         self._user_data = refreshed_data
         self.user_id = refreshed_data.user_id
         self.metadata = refreshed_data.metadata
+        self.plan_id = refreshed_data.plan_id
         self.merge_conflict_enabled = refreshed_data.merge_conflict_enabled
         self.created_at = refreshed_data.created_at
         self.last_active_at = refreshed_data.last_active_at
