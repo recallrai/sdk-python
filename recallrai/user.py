@@ -78,7 +78,9 @@ class User:
                 True = always raise merge conflicts for this user.
                 False = never raise merge conflicts for this user.
                 None = inherit the project-level setting (pass explicitly to reset).
-            new_plan_id: New plan identifier to assign to this user.
+            new_plan_id: Optional plan reassignment target. Use this only when
+                moving the user to another plan. Users always require an
+                assigned plan.
 
         Raises:
             UserNotFoundError: If the user is not found.

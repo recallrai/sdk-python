@@ -17,7 +17,7 @@ class UserModel(BaseModel):
     
     user_id: str = Field(..., description="Unique identifier for the user.")
     metadata: Union[Dict[str, Any], Unavailable] = Field(..., description="Custom metadata for the user.")
-    plan_id: Union[Optional[str], Unavailable] = Field(..., description="Assigned plan identifier for this user.")
+    plan_id: Union[str, Unavailable] = Field(..., description="Assigned plan identifier for this user.")
     merge_conflict_enabled: Union[Optional[bool], Unavailable] = Field(None, description="Per-user merge conflict override. True=always raise, False=never raise, None=inherit project setting.")
     created_at: Union[datetime, Unavailable] = Field(..., description="When the user was created.")
     last_active_at: Union[datetime, Unavailable] = Field(..., description="When the user was last active.")
