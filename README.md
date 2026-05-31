@@ -40,9 +40,14 @@ client = RecallrAI(
 ```python
 from recallrai.exceptions import UserAlreadyExistsError
 try:
-    user = client.create_user(user_id="user123", metadata={"name": "John Doe"})
+    user = client.create_user(
+        user_id="user123",
+        plan_id="plan_basic_v1",
+        metadata={"name": "John Doe"},
+    )
     print(f"Created user: {user.user_id}")
     print(f"User metadata: {user.metadata}")
+    print(f"Assigned plan: {user.plan_id}")
     print(f"Created at: {user.created_at}")
     print(f"Merge conflict enabled: {user.merge_conflict_enabled}")  # None = inherit project setting
 except UserAlreadyExistsError as e:
@@ -56,6 +61,7 @@ from recallrai.exceptions import UserNotFoundError
 try:
     user = client.get_user("user123")
     print(f"User metadata: {user.metadata}")
+    print(f"User plan: {user.plan_id}")
     print(f"Last active: {user.last_active_at}")
 except UserNotFoundError as e:
     print(f"Error: {e}")
@@ -78,6 +84,7 @@ print("---")
 for u in user_list.users:
     print(f"User ID: {u.user_id}")
     print(f"Metadata: {u.metadata}")
+    print(f"Plan: {u.plan_id}")
     print(f"Created at: {u.created_at}")
     print(f"Last active: {u.last_active_at}")
     print("---")
@@ -93,10 +100,12 @@ try:
     user.update(
         new_metadata={"name": "John Doe", "role": "admin"},
         new_user_id="john_doe",
-        merge_conflict_enabled=True  # override: always raise merge conflicts for this user
+        merge_conflict_enabled=True,  # override: always raise merge conflicts for this user
+        new_plan_id="plan_pro_v2",
     )
     print(f"Updated user ID: {user.user_id}")
     print(f"Updated metadata: {user.metadata}")
+    print(f"Updated plan: {user.plan_id}")
     print(f"Merge conflict enabled: {user.merge_conflict_enabled}")
     print(f"Last active: {user.last_active_at}")
 except UserNotFoundError as e:
@@ -113,6 +122,7 @@ try:
     user = client.get_user("john_doe")
     user.refresh()
     print(f"Refreshed user metadata: {user.metadata}")
+    print(f"Refreshed user plan: {user.plan_id}")
     print(f"Last active: {user.last_active_at}")
 except UserNotFoundError as e:
     print(f"Error: {e}")
@@ -165,6 +175,8 @@ try:
     session = user.get_session(session_id="session-uuid")
     print("Session status:", session.status)
     print("Session metadata:", session.metadata)
+    print("Plan used:", session.plan_used_id)
+    print("Plan used version:", session.plan_used_version)
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
@@ -233,6 +245,8 @@ try:
     session.refresh()
     print("Session status:", session.status)
     print("Refreshed session metadata:", session.metadata)
+    print("Refreshed plan used:", session.plan_used_id)
+    print("Refreshed plan used version:", session.plan_used_version)
 except UserNotFoundError as e:
     print(f"Error: {e}")
 except SessionNotFoundError as e:
@@ -712,7 +726,7 @@ def chat_with_memory(user_id, session_id=None):
     try:
         user = rai_client.get_user(user_id)
     except UserNotFoundError:
-        user = rai_client.create_user(user_id)
+        user = rai_client.create_user(user_id=user_id, plan_id="plan_basic_v1")
     
     # Create a new session or get an existing one
     if session_id:
@@ -963,7 +977,7 @@ When implementing error handling with the RecallrAI SDK, consider these best pra
    try:
        user = client.get_user(user_id)
    except UserNotFoundError:
-       user = client.create_user(user_id)
+       user = client.create_user(user_id=user_id, plan_id="plan_basic_v1")
    ```
 
 For more detailed information on specific exceptions, refer to the API documentation.

@@ -51,6 +51,8 @@ class Session:
         self.status = self._session_data.status
         self.created_at = self._session_data.created_at
         self.metadata = self._session_data.metadata
+        self.plan_used_id = self._session_data.plan_used_id
+        self.plan_used_version = self._session_data.plan_used_version
 
     def add_message(self, role: MessageRole, content: str) -> None:
         """
@@ -348,7 +350,12 @@ class Session:
             )
         
         updated_data = SessionModel.from_api_response(response.json())
+        self._session_data = updated_data
+        self.status = updated_data.status
+        self.created_at = updated_data.created_at
         self.metadata = updated_data.metadata
+        self.plan_used_id = updated_data.plan_used_id
+        self.plan_used_version = updated_data.plan_used_version
 
     def refresh(self) -> None:
         """
@@ -387,6 +394,8 @@ class Session:
         self.status = self._session_data.status
         self.created_at = self._session_data.created_at
         self.metadata = self._session_data.metadata
+        self.plan_used_id = self._session_data.plan_used_id
+        self.plan_used_version = self._session_data.plan_used_version
 
     def process(self) -> None:
         """
